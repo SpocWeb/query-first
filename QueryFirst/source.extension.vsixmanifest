@@ -7,7 +7,7 @@
         <MoreInfo>https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst</MoreInfo>
     </Metadata>
     <Installation>
-		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,17.0]">
+		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0]">
 			<ProductArchitecture>amd64</ProductArchitecture>
 		</InstallationTarget>
     </Installation>
@@ -20,6 +20,6 @@
         <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" AssemblyName="|%CurrentProject%;AssemblyName|" />
     </Assets>
     <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" />
     </Prerequisites>
 </PackageManifest>
