@@ -174,6 +174,8 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         /// <param name="state"></param>
         internal void ProcessUpToStep4(Document queryDoc, ref State state)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // todo: if a .sql is not in the project, this throws null exception. What should it do?
             new _1ProcessQueryPath().Go(state, (string)queryDoc.ProjectItem.Properties.Item("FullPath").Value);
 
@@ -216,7 +218,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var textDoc = ((TextDocument)_queryDoc.Object());
-            textDoc.ReplacePattern(pattern, replaceWith);
+            textDoc.ReplaceText(pattern, replaceWith);
         }
 
         public string GenerateCode(State state)

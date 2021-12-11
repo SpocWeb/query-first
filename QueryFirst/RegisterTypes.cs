@@ -61,7 +61,7 @@ namespace QueryFirst
 
                 //_VSOutputWindow.Write("Registered types...\n");
             }
-            catch (Exception ex)
+            catch
             {
                 //outputWindow.Write(ex.Message + '\n' + ex.StackTrace);
             }

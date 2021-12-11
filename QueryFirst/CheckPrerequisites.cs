@@ -1,6 +1,8 @@
 ﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace QueryFirst
@@ -8,8 +10,10 @@ namespace QueryFirst
     static class CheckPrerequisites
     {
         private static string _checkedSolution = "";
-        internal static bool HasPrerequites(Solution solution, ProjectItem item)
+        internal static async Task<bool> HasPrerequitesAsync(Solution solution, ProjectItem item)
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             if (solution.FullName == _checkedSolution)
                 return true;
 
@@ -105,6 +109,8 @@ namespace " + rootNamespace + @"
         }
         private static void checkInFolder(ProjectItems items, ref bool foundConfig, ref bool foundQfRuntimeConnection)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             foreach (ProjectItem item in items)
             {
                 try
@@ -116,7 +122,7 @@ namespace " + rootNamespace + @"
                     if (item.Kind == "{6BB5F8EF-4483-11D3-8BCF-00C04F8EC28C}") //folder
                         checkInFolder(item.ProjectItems, ref foundConfig, ref foundQfRuntimeConnection);
                 }
-                catch (Exception ex)
+                catch
                 {
                 }
             }
