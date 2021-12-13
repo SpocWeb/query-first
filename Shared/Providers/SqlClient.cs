@@ -138,7 +138,11 @@ namespace QueryFirst.Providers
         {
             // ToDo. I'm mixing Smo calls with string manip. This will not do.
             // Table Valued Parameters...
+#if VS16
+            SqlConnection conn = new SqlConnection(connectionString);
+#else
             Microsoft.Data.SqlClient.SqlConnection conn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+#endif
             Server s = new Server(new ServerConnection(conn));
             var myDb = s.Databases.Cast<Database>().Where(db => db.ActiveConnections > 0).FirstOrDefault();
             var type = myDb.UserDefinedTableTypes.Cast<UserDefinedTableType>().Where(t => t.Name == paramName);
