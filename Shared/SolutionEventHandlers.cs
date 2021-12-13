@@ -2,12 +2,13 @@
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
+using System.Threading.Tasks;
 using TinyIoC;
 
 namespace QueryFirst
@@ -44,8 +45,22 @@ namespace QueryFirst
             myEvents = dte.Events;
             myDocumentEvents = dte.Events.DocumentEvents;
 
-            myDocumentEvents.DocumentOpened += myDocumentEvents_DocumentOpened;
-            myDocumentEvents.DocumentSaved += myDocumentEvents_DocumentSaved;
+            myDocumentEvents.DocumentOpened += (doc) =>
+            {
+                // The outer delegate is synchronous, but kicks off async work via a method that accepts an async delegate.
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+                {
+                    await myDocumentEvents_DocumentOpenedAsync(doc);
+                });
+            };
+            myDocumentEvents.DocumentSaved += (doc) =>
+            {
+                // The outer delegate is synchronous, but kicks off async work via a method that accepts an async delegate.
+                _ = ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+                {
+                    await myDocumentEvents_DocumentSavedAsync(doc);
+                });
+            };
             CSharpProjectItemsEvents = (ProjectItemsEvents)dte.Events.GetObject("CSharpProjectItemsEvents");
             CSharpProjectItemsEvents.ItemRenamed += CSharpItemRenamed;
             myEvents.SolutionEvents.Opened += SolutionEvents_Opened;
@@ -101,7 +116,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                                 rememberToClose = true;
                             }
                             var userFile = ((TextDocument)item.Document.Object());
-                            userFile.ReplacePattern(oldBaseName, newBaseName);
+                            userFile.ReplaceText(oldBaseName, newBaseName);
                             item.Document.Save();
 
                             if (rememberToClose)
@@ -126,25 +141,29 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                 }
             }
         }
-        private void myDocumentEvents_DocumentOpened(Document Document)
+        private async System.Threading.Tasks.Task myDocumentEvents_DocumentOpenedAsync(Document Document)
         {
             if (!connecting)
             {
                 // we need to let the window initialise, otherwise intellisense is broken
-                var t = new System.Threading.Thread(() => connectEditorWindow2DB(Document));
-                t.Start();
+                _ = System.Threading.Tasks.Task.Run(async () => await connectEditorWindow2DBAsync(Document));
+                await System.Threading.Tasks.Task.Delay(0);
             }
         }
         private bool connecting = false;
-        private void connectEditorWindow2DB(Document Document)
+        private async System.Threading.Tasks.Task connectEditorWindow2DBAsync(Document Document)
         {
             try
             {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                 connecting = true;
                 // on my machine, delays less than 700ms hang the environment. Better not do that to folk.
-                System.Threading.Thread.Sleep(1500);
-                if (Document.FullName.EndsWith(".sql"))
+                //System.Threading.Thread.Sleep(1500); // removing, seems to be ok now
+                if (Document.FullName.EndsWith(".sql") && _lastConnectedSqlWindow != Document.ActiveWindow)
                 {
+                    _lastConnectedSqlWindow = Document.ActiveWindow;
+
                     var textDoc = ((TextDocument)Document.Object());
                     var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
                     if (text.Contains("managed by QueryFirst"))
@@ -154,12 +173,10 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                         var state = new State();
                         new Conductor(_VSOutputWindow, null, null).ProcessUpToStep4(Document, ref state);
 
-                        if (_lastConnectedSqlWindow != Document.ActiveWindow
-                            && state._4Config.provider == "System.Data.SqlClient"
+                        if (state._4Config.provider == "System.Data.SqlClient"
                             && state._4Config.connectEditor2DB
                             )
                         {
-                            _lastConnectedSqlWindow = Document.ActiveWindow;
 
                             IVsPackage sqlEditorPackageInstance = null;
                             IVsShell val = Package.GetGlobalService(typeof(SVsShell)) as IVsShell;
@@ -179,7 +196,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
 
                                 var isQueryWindowInfo = auxiliaryDocData.GetType().GetRuntimeProperties().Where(p => p.Name == "IsQueryWindow").FirstOrDefault();
 
-                                var strategyInfo = Type.GetType("Microsoft.VisualStudio.Data.Tools.SqlEditor.DataModel.DefaultSqlEditorStrategy, Microsoft.VisualStudio.Data.Tools.SqlEditor, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+                                var strategyInfo = Type.GetType("Microsoft.VisualStudio.Data.Tools.SqlEditor.DataModel.DefaultSqlEditorStrategy, Microsoft.VisualStudio.Data.Tools.SqlEditor, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
                                 var ctors = strategyInfo.GetConstructors(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance);
                                 var strategyInstance = ctors[3].Invoke(new object[] { new SqlConnectionStringBuilder(state._4Config.defaultConnection), true });
 
@@ -199,14 +216,14 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                 }
                 connecting = false;
             }
-            catch(Exception ex)
+            catch
             {
                 // in space no-one can hear you scream.
             }
         }
-        void myDocumentEvents_DocumentSaved(Document Document)
+        async System.Threading.Tasks.Task myDocumentEvents_DocumentSavedAsync(Document Document)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             //kludge
             if (!TinyIoCContainer.Current.CanResolve<IProvider>())
@@ -218,7 +235,7 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                     var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
                     if (text.Contains("managed by QueryFirst"))
                     {
-                        if (CheckPrerequisites.HasPrerequites(_dte.Solution, Document.ProjectItem))
+                        if (await CheckPrerequisites.HasPrerequitesAsync(_dte.Solution, Document.ProjectItem))
                         {
                             var cdctr = new Conductor(_VSOutputWindow, null, null);
                             cdctr.ProcessOneQuery(Document);
@@ -231,6 +248,6 @@ https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst#review-
                     _VSOutputWindow.Write(ex.Message + ex.StackTrace);
                 }
         }
-        #endregion
+#endregion
     }
 }

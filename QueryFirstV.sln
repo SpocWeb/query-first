@@ -13,7 +13,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirstInMemoryCompilati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst_VS16", "QueryFirst_VS16\QueryFirst_VS16.csproj", "{481ADC64-EF55-4E22-8BDB-24F5C0865161}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{F88A3934-065E-490C-A514-0B791E832170}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared\Shared.projitems*{481adc64-ef55-4e22-8bdb-24f5c0865161}*SharedItemsImports = 4
+		Shared\Shared.projitems*{b6a48b04-12db-43ce-8fad-b07bbb0198a6}*SharedItemsImports = 4
+		Shared\Shared.projitems*{f88a3934-065e-490c-a514-0b791e832170}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
