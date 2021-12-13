@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="QueryFirst.Boddy Simon.0ddf49a0-289f-40e8-b2ab-f6a4f80a4a1d" Version="1.1.4" Language="en-US" Publisher="Simon Boddy" />
+        <Identity Id="QueryFirst.Boddy Simon.0ddf49a0-289f-40e8-b2ab-f6a4f80a4a1d" Version="1.2.0" Language="en-US" Publisher="Simon Boddy" />
         <DisplayName>QueryFirst</DisplayName>
         <Description xml:space="preserve">Frictionless data access for C# projects</Description>
         <MoreInfo>https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst</MoreInfo>
     </Metadata>
     <Installation>
-		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)">
-			<ProductArchitecture>amd64</ProductArchitecture>
-		</InstallationTarget>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
     </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.8.0,)" />
