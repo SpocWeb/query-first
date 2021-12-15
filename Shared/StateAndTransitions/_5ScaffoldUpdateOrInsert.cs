@@ -30,34 +30,24 @@ namespace QueryFirst
                 if (matchInsert.Success)
                 {
 
-                    state._5QueryAfterScaffolding =
-    @"/* .sql query managed by QueryFirst add-in */
-
-
+                    state._5QueryAfterScaffolding = @"/* .sql query managed by QueryFirst add-in */
 -- designTime - put parameter declarations and design time initialization here
-
-
 -- endDesignTime
 INSERT INTO " + targetTable + @" (
-" + string.Join(",\r\n", cols.Select(col => col.ColumnName)) + @"
+" + string.Join(",\r\n", cols.Select(col => "\t" + col.ColumnName)) + @"
 )
 VALUES (
-" + string.Join(",\r\n", cols.Select(col => "@" + col.ColumnName)) + @"
+" + string.Join(",\r\n", cols.Select(col => "\t@" + col.ColumnName)) + @"
 )";
                 }
                 else if (matchUpdate.Success)
                 {
-                    state._5QueryAfterScaffolding =
-@"/* .sql query managed by QueryFirst add-in */
-
-
+                    state._5QueryAfterScaffolding = @"/* .sql query managed by QueryFirst add-in */
 -- designTime - put parameter declarations and design time initialization here
-
-
 -- endDesignTime
 UPDATE " + targetTable + @"
 SET 
-" + string.Join(",\r\n", cols.Select(col=> col.ColumnName + " = @" + col.ColumnName ));
+" + string.Join(",\r\n", cols.Select(col=> "\t" + col.ColumnName + " = @" + col.ColumnName ));
                 }
             }
             else state._5QueryAfterScaffolding = state._3InitialQueryText;

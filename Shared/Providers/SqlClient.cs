@@ -107,7 +107,7 @@ namespace QueryFirst.Providers
             try
             {
                 // hack
-                if (typeOnly == "sql_variant")
+                if (typeOnly.ToLower() == "sql_variant")
                     typeOnly = "Variant";
                 var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), typeOnly, true);
                 var csType = TypeConvertor.ToNetType(sqlDbType);
@@ -242,7 +242,7 @@ namespace QueryFirst.Providers
                     direction = "";
 
                 // build declaration.
-                bldr.Append("declare " + qp.DbName + " " + qp.DbType);
+                bldr.Append("DECLARE " + qp.DbName + " " + qp.DbType.ToUpper());
                 //if (qp.Length != 0)
                 //{
                 //    bldr.Append("(" + qp.Length + ")");

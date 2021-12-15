@@ -12,9 +12,7 @@ namespace QueryFirst
             return @"using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;" +
 $"\nusing static {state._1BaseName};" +
 (state._8HasTableValuedParams ? "\nusing FastMember; // Table valued params require the FastMember Nuget package\n" : "\n");
