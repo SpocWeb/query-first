@@ -4,12 +4,13 @@ using FluentAssertions;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
 
 namespace QueryFirstTests
 {
     public class ConfigResolverTests
     {
-        private _4ResolveConfig _configResolver;
+        private _3ResolveConfig _configResolver;
         public ConfigResolverTests()
         {
             _configResolver = new _4ResolveConfig(new FakeConfigFileReader());
@@ -113,6 +114,26 @@ endDesignTime*/
                 provider = "providerFromFake",
                 helperAssembly = "helperAssemblyFromFake"
             };
+        }
+
+        public List<ProjectSection> GetInstallConfig()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public QfConfigModel GetProjectConfig(string fileOrFolder)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public (string projectRoot, string fileContents) GetProjectConfigFile(string folder)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public QfConfigModel GetQueryConfig(string queryFilename)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using QueryFirst;
-using QueryFirstTests;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;

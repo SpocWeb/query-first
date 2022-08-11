@@ -135,6 +135,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\QueryFirst.CoreLib\QueryFirst.CoreLib.csproj">
+      <Project>{ae93d326-707d-4ca8-a3d5-67ba9b8ce569}</Project>
+      <Name>QueryFirst.CoreLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\QueryFirstQueryTemplate\QueryFirstQueryTemplate.csproj">
       <Project>{2D6B875E-27AB-401A-8D5F-0F085DE4CE0E}</Project>
       <Name>QueryFirstQueryTemplate</Name>

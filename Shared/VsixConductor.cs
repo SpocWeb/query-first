@@ -258,7 +258,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var textDoc = ((TextDocument)_queryDoc.Object());
-            textDoc.ReplacePattern(pattern, replaceWith);
+            textDoc.ReplacePattern(pattern, replaceWith, 0, null);
         }
     }
 }

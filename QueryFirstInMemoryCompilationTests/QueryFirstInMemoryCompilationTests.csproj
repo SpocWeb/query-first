@@ -53,9 +53,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QueryFirstTests\QueryFirstTests.csproj">
-      <Project>{f99b0827-b712-4d27-b908-2ad49bddc8bd}</Project>
-      <Name>QueryFirstTests</Name>
+    <ProjectReference Include="..\QueryFirst.CoreLib\QueryFirst.CoreLib.csproj">
+      <Project>{ae93d326-707d-4ca8-a3d5-67ba9b8ce569}</Project>
+      <Name>QueryFirst.CoreLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\QueryFirst\QueryFirst.csproj">
       <Project>{b6a48b04-12db-43ce-8fad-b07bbb0198a6}</Project>
