@@ -130,17 +130,20 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     var generatedFiles = new InstantiateAndCallGenerators().GetFilenames(_state);
                     foreach (var filename in generatedFiles)
                     {
-                        StringBuilder bldr = new StringBuilder();
-                        bldr.AppendLine("Error running query.");
-                        bldr.AppendLine();
-                        bldr.AppendLine("/*The last attempt to run this query failed with the following error. This class is no longer synced with the query");
-                        bldr.AppendLine("You can compile the class by deleting this error information, but it will likely generate runtime errors.");
-                        bldr.AppendLine("-----------------------------------------------------------");
-                        bldr.AppendLine(ex.Message);
-                        bldr.AppendLine("-----------------------------------------------------------");
-                        bldr.AppendLine(ex.StackTrace);
-                        bldr.AppendLine("*/");
-                        File.AppendAllText(filename, bldr.ToString());
+                        if (File.Exists(filename))
+                        {
+                            StringBuilder bldr = new StringBuilder();
+                            bldr.AppendLine("Error running query.");
+                            bldr.AppendLine();
+                            bldr.AppendLine("/*The last attempt to run this query failed with the following error. This class is no longer synced with the query");
+                            bldr.AppendLine("You can compile the class by deleting this error information, but it will likely generate runtime errors.");
+                            bldr.AppendLine("-----------------------------------------------------------");
+                            bldr.AppendLine(ex.Message);
+                            bldr.AppendLine("-----------------------------------------------------------");
+                            bldr.AppendLine(ex.StackTrace);
+                            bldr.AppendLine("*/");
+                            File.AppendAllText(filename, bldr.ToString());
+                        }
                     }
                     throw;
                 }
@@ -186,7 +189,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                 }
             }
             catch (Exception ex)
-            {                
+            {
                 _vsOutputWindow.Write($"ERROR processing {queryDoc.FullName}{n}{ex.TellMeEverything()}{n}");
             }
             return _state;
