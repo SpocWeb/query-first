@@ -1,42 +1,41 @@
 ﻿using EnvDTE;
-using Microsoft.VisualStudio.Shell;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace QueryFirst
+namespace QueryFirst.VSExtension
 {
     static class CheckPrerequisites
     {
         private static string _checkedSolution = "";
-        internal static async Task<bool> HasPrerequitesAsync(Solution solution, ProjectItem item)
+        internal static bool HasPrerequites(Solution solution, ProjectItem item)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
+            return true;
+            // todo : not sure I like this anymore. Little bit invasive and tricky to get right.
             if (solution.FullName == _checkedSolution)
                 return true;
 
             bool foundConfig = false;
             bool foundQfRuntimeConnection = false;
-            string caption = "QueryFirst missing prerequisites";
+            string caption = "QueryFirst.VSExtension missing prerequisites";
             string message = "";
             foreach (Project proj in solution.Projects)
             {
-                checkInFolder(proj.ProjectItems, ref foundConfig, ref foundQfRuntimeConnection);
+                if (proj.ProjectItems != null)
+                    checkInFolder(proj.ProjectItems, ref foundConfig, ref foundQfRuntimeConnection);
             }
             if (!foundConfig && !foundQfRuntimeConnection)
-                message = @"QueryFirst requires a config file (qfconfig.json) and a runtime connection (QfRuntimeConnection.cs)
+                message = @"QueryFirst.VSExtension requires a config file (qfconfig.json) and a connection factory (QfDbConnectionFactory.cs)
 
 Would you like us to create these for you? 
 
 You will need to modify the connection string in each file.";
             else if (!foundConfig)
-                message = @"QueryFirst requires a config file (qfconfig.json)
+                message = @"QueryFirst.VSExtension requires a config file (qfconfig.json)
 
 Would you like us to create this for you? You will need to modify the connection string.";
             else if (!foundQfRuntimeConnection)
-                message = @"QueryFirst requires a runtime connection (QfRuntimeConnection.cs)
+                message = @"QueryFirst.VSExtension requires a connection factory (QfDbConnectionFactory.cs).
 
 Would you like us to create this for you? You will need to modify the connection string.";
             else
@@ -62,43 +61,55 @@ Would you like us to create this for you? You will need to modify the connection
 @"{
   ""defaultConnection"": ""Server=localhost\\SQLEXPRESS;Database=NORTHWND;Trusted_Connection=True;"",
   ""provider"": ""System.Data.SqlClient"",
-  ""connectEditor2DB"":false
+  ""connectEditor2DB"":true
 }"
                 );
                     var config = item.ContainingProject.ProjectItems.AddFromFile(configFileNameAndPath);
                     config.Open();
                 }
-                if(!foundQfRuntimeConnection)
+                if (!foundQfRuntimeConnection)
                 {
                     //make QfRuntimeConnection
                     string rootNamespace = "";
-                    foreach(Property prop in item.ContainingProject.Properties)
+                    foreach (Property prop in item.ContainingProject.Properties)
                     {
-                        if(prop.Name == "RootNamespace")
+                        if (prop.Name == "RootNamespace")
                         {
                             rootNamespace = prop.Value as string;
                             break;
                         }
                     }
-                    var configFileNameAndPath = Path.GetDirectoryName(item.ContainingProject.FileName) + @"\QfRuntimeConnection.cs";
+                    var configFileNameAndPath = Path.GetDirectoryName(item.ContainingProject.FileName) + @"\QfDbConnectionFactory.cs";
                     File.WriteAllText(configFileNameAndPath,
-@"using System.Data;
-using System.Data.SqlClient;
+$@"using System.Data;
 
-/* What provider are you using? For SqlClient, you will need to add a project reference (.net framework) or 
-the System.Data.SqlClient nuget package (.net core). */
+namespace QueryFirst
+{{
+    /// <summary>
+    /// If you're already referencing QueryFirst.CoreLib for self tests, you've already got this interface and you can delete this copy.
+    /// </summary>
+    public interface IQfDbConnectionFactory
+    {{
+        IDbConnection CreateConnection();
+    }}
+}}
 
+namespace MyProjectNamespace
+{{
+    using System.Data.SqlClient;
+    using QueryFirst;
 
-namespace " + rootNamespace + @"
-{
-    class QfRuntimeConnection
-    {
-        public static IDbConnection GetConnection()
-        {
-            return new SqlConnection(""Server=localhost\\SQLEXPRESS;Database=NORTHWND;Trusted_Connection=True;"");
-        }
-    }
-}"
+    /// <summary>
+    /// QueryFirst NEEDS YOU to implement its connection factory. You will need to customise this
+    /// obviously for your environment/provider. The generated repo needs a connection factory instance, and will call CreateConnection()
+    /// for every query execution. If you want something else, there are overloads where you supply the connection.
+    /// </summary>
+    public class QfDbConnectionFactory : IQfDbConnectionFactory
+    {{
+        public IDbConnection CreateConnection() => new SqlConnection(""Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True;"");
+    }}
+}}
+"
                 );
                     var newClass = item.ContainingProject.ProjectItems.AddFromFile(configFileNameAndPath);
                     newClass.Open();
@@ -109,7 +120,7 @@ namespace " + rootNamespace + @"
         }
         private static void checkInFolder(ProjectItems items, ref bool foundConfig, ref bool foundQfRuntimeConnection)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
+            _ = items ?? throw new ArgumentException(nameof(items));
 
             foreach (ProjectItem item in items)
             {
@@ -119,10 +130,10 @@ namespace " + rootNamespace + @"
                         foundConfig = true;
                     if (item.FileNames[1].ToLower().EndsWith("qfruntimeconnection.cs"))
                         foundQfRuntimeConnection = true;
-                    if (item.Kind == "{6BB5F8EF-4483-11D3-8BCF-00C04F8EC28C}") //folder
+                    if (item.Kind == "{6BB5F8EF-4483-11D3-8BCF-00C04F8EC28C}" && item.ProjectItems != null) //folder
                         checkInFolder(item.ProjectItems, ref foundConfig, ref foundQfRuntimeConnection);
                 }
-                catch
+                catch (Exception ex)
                 {
                 }
             }

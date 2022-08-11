@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
 
-namespace QueryFirst
+namespace QueryFirst.VSExtension
 {
     /// <summary>
     /// Command handler
@@ -90,7 +90,7 @@ namespace QueryFirst
             ThreadHelper.ThrowIfNotOnUIThread();
             DTE2 dte2 = ServiceProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2;//Package.GetGlobalService(typeof(DTE)) as DTE2;
             var vsOutputWindow = new VSOutputWindow(dte2);
-            RegisterTypes.Instance.Register(vsOutputWindow,false);
+            RegisterTypes.Register(null, false);
 
             foreach (Project proj in ((QueryFirstCmdPackage)_package).dte.Solution.Projects)
             {
@@ -113,16 +113,16 @@ namespace QueryFirst
                             item.Open();
                             var textDoc = ((TextDocument)item.Document.Object());
                             var text = textDoc.CreateEditPoint().GetText(textDoc.EndPoint);
-                            if (text.Contains("managed by QueryFirst"))
+                            if (text.ToLower().Contains("queryfirst"))
                             {
-                                new Conductor(vsOutputWindow, null, null).ProcessOneQuery(item.Document);
+                                new VsixConductor(vsOutputWindow, null, null).ProcessOneQuery(item.Document, true);
                             }
-                            
+
                         }
                         if (item.Kind == "{6BB5F8EF-4483-11D3-8BCF-00C04F8EC28C}") //folder
                             ProcessAllItems(item.ProjectItems, vsOutputWindow);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         vsOutputWindow.Write(ex.ToString());
                     }

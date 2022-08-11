@@ -10,49 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CheckPrerequisites.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Conductor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ConfigFileReader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DesignTimeConnectionString.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IConfigFileReader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IWrapperClassMaker.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\IProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\MySqlClient.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\Npgsql.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\sp_describe_undeclared_parameters.gen.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\sp_describe_undeclared_parametersResults.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\SqlClient.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Providers\SqlClient\SqlDbType2DbType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QfRuntimeConnection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryFirstCmd.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueryFirstCmdPackage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)QueryParam.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RegisterTypes.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ResultClassMaker.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ResultFieldDetails.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\AdoSchemaFetcher.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\ISchemaFetcher.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\IDB2CS.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\Postgres2CS.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\SqlServer2CS.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\System2Alias.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SolutionEventHandlers.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\State.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_1ProcessQueryPath.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_2ExtractNamesFromUserPartialClass.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_3ReadQuery.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_4ResolveConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_5ScaffoldUpdateOrInsert.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_6FindUndeclaredParameters.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_7RunQueryAndGetResultSchema.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\_8ParseOrFindDeclaredParams.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TinyIoC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VsixConductor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSOutputWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WizardImplementationClass.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WrapperClassMaker.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Providers\sp_describe_undeclared_parameters.sql" />
   </ItemGroup>
 </Project>

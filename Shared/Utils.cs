@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace QueryFirst
+namespace QueryFirst.VSExtension
 {
     public static class Utils
     {
+        private static readonly string n = Environment.NewLine;
         public static string TellMeEverything(this Exception ex, string indent = "")
         {
-            return "\r\n" + indent + ex.Message + "\r\n"
-                + indent + ex.StackTrace.Replace("\r\n", "\r\n" + indent)
-                + ex.InnerException?.TellMeEverything(indent + "  ") ;
+            return $@"n{indent}{ex.Message}
+{indent}{ex.StackTrace.Replace(n, n + indent)}
+{ex.InnerException?.TellMeEverything(indent + "  ")}";
         }
     }
 }

@@ -104,7 +104,7 @@ using System.Threading;
 
 #endif
 
-namespace TinyIoC
+namespace QueryFirst
 {
 #endif
 
@@ -2707,9 +2707,10 @@ namespace TinyIoC
         /// Attempts to resolve all public property dependencies on the given object.
         /// </summary>
         /// <param name="input">Object to "build up"</param>
-        public void BuildUp(object input)
+        public object BuildUp(object input)
         {
             BuildUpInternal(input, ResolveOptions.Default);
+            return input;
         }
 
         /// <summary>
@@ -2717,9 +2718,10 @@ namespace TinyIoC
         /// </summary>
         /// <param name="input">Object to "build up"</param>
         /// <param name="resolveOptions">Resolve options to use</param>
-        public void BuildUp(object input, ResolveOptions resolveOptions)
+        public object BuildUp(object input, ResolveOptions resolveOptions)
         {
             BuildUpInternal(input, resolveOptions);
+            return input;
         }
         #endregion
         #endregion
@@ -4175,26 +4177,6 @@ namespace TinyIoC
 
         #endregion
     }
-    [AttributeUsage(AttributeTargets.Class)]
-    public class RegistrationName : Attribute
-    {
-        private string _name;
-        public RegistrationName(string name)
-        {
-            _name = name;
-        }
-        public string Name { get { return _name; } }
-    }
-    public static class ExtendTypeWithRegistrationName
-    {
-        public static string RegistrationName(this Type t)
-        {
-            var attr = ((RegistrationName)t.GetCustomAttributes(typeof(RegistrationName), true).FirstOrDefault());
-            if (attr != null)
-                return attr.Name;
-            return null;
-        }
-    }
 #if PORTABLE || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
     static class ReverseTypeExtender
     {
@@ -4251,7 +4233,7 @@ namespace TinyIoC
 #endif
     // reverse shim for WinRT SR changes...
 #if (!NETFX_CORE && !PORTABLE && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 || !NETSTANDARD1_6)
-    static class ReverseTypeExtender
+    internal static class ReverseTypeExtender
     {
         public static bool IsClass(this Type type)
         {

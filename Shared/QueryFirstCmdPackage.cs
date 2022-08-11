@@ -4,23 +4,23 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+// sby
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
-// sby
-using EnvDTE;
-using EnvDTE80;
 using System.Threading;
 
-namespace QueryFirst
+namespace QueryFirst.VSExtension
 {
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.

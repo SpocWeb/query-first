@@ -3,7 +3,7 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using System;
 
-namespace QueryFirst
+namespace QueryFirst.VSExtension
 {
     public class VSOutputWindow
     {
@@ -15,7 +15,7 @@ namespace QueryFirst
 
             for (uint i = 1; i <= outputWindow.OutputWindowPanes.Count; i++)
             {
-                if (outputWindow.OutputWindowPanes.Item(i).Name.Equals("QueryFirst", StringComparison.CurrentCultureIgnoreCase))
+                if (outputWindow.OutputWindowPanes.Item(i).Name.Equals("QueryFirst.VSExtension", StringComparison.CurrentCultureIgnoreCase))
                 {
                     _outPane = outputWindow.OutputWindowPanes.Item(i);
                     break;
@@ -23,7 +23,7 @@ namespace QueryFirst
             }
 
             if (_outPane == null)
-                _outPane = outputWindow.OutputWindowPanes.Add("QueryFirst");
+                _outPane = outputWindow.OutputWindowPanes.Add("QueryFirst.VSExtension");
 
         }
         public void Write(string message)
