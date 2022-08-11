@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueryFirst.VSExtension
+namespace QueryFirst
 {
     public static class QfRuntimeConnection
     {
