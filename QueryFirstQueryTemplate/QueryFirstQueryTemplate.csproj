@@ -77,8 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="Query.gen.cs" />
-    <None Include="QueryResults.cs" />
+    <None Include="Query.sql.cs" />
   </ItemGroup>
   <ItemGroup>
     <VSTemplate Include="QueryFirstQueryTemplate.vstemplate">

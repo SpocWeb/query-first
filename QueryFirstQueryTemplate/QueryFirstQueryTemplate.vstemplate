@@ -18,8 +18,7 @@
       </Reference>
     </References>
     <ProjectItem ReplaceParameters="true" ItemType="None">Query.sql</ProjectItem>
-    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.gen.cs">Query.gen.cs</ProjectItem>
-    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$Results.cs">QueryResults.cs</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.sql.cs">Query.sql.cs</ProjectItem>
   </TemplateContent>
   <WizardExtension>
     <Assembly>QueryFirst, Version=1.0.0.0, Culture=neutral, PublicKeyToken=4688a60b10e39f04</Assembly>

@@ -58,8 +58,8 @@ namespace QueryFirst.VSExtension
             if (!spammed)
             {
                 _VSOutputWindow.Write(
-@"If you're using and enjoying QueryFirst.VSExtension, please leave a review!
-https://marketplace.visualstudio.com/items?itemName=bbsimonbb.QueryFirst.VSExtension#review-details
+$@"If you're using and enjoying QueryFirst.VSExtension, please leave a review!
+{VersionSpecificConstants.ReviewLink}
 "
                 );
                 spammed = true;

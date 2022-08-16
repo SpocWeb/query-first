@@ -9,7 +9,6 @@
     <Import_RootNamespace>Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)CheckPrerequisites.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Class1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config\ConfigBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config\ConfigFileReader.cs" />
@@ -45,8 +44,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Providers\SqlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\SqlClient\SqlDbType2DbType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QfRuntimeConnection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)QueryFirstCmd.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)QueryFirstCmdPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\AdoSchemaFetcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\ISchemaFetcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\IDB2CS.cs" />
@@ -54,7 +51,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\SqlServer2CS.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\SqlServer2Typescript.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaFetching\TypeMappings\System2Alias.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SolutionEventHandlers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\QueryParamInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\ResultFieldDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StateAndTransitions\State.cs" />
@@ -69,8 +65,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TinyIoC.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\Extensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)VsixConductor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)VSOutputWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WizardImplementationClass.cs" />
   </ItemGroup>
   <ItemGroup>

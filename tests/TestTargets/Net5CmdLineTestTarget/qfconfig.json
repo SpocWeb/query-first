@@ -1,0 +1,6 @@
+{
+  "defaultConnection": "Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; ",
+  "provider": "System.Data.SqlClient",
+  "connectEditor2DB": true
+}
+            

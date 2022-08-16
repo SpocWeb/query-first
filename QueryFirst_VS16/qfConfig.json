@@ -1,0 +1,10 @@
+[
+  {
+    "projectType": "cSharp",
+    "qfConfig": {
+      "generators": [
+        { "name": "CSharp" }
+      ]
+    }
+  }
+]
