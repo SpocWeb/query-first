@@ -3,7 +3,11 @@
     "WatchNet5TestTarget": {
       "commandName": "Project",
       "commandLineArgs": "-w",
-      "workingDirectory": "C:\\dev\\QueryFirst.CommandLine\\Net5CmdLineTestTarget"
+      "workingDirectory": "C:\\Users\\sboddy\\source\\repos\\query-first\\tests\\TestTargets\\Net5CmdLineTestTarget"
+    },
+    "RebuildNet5TestTarget": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\sboddy\\source\\repos\\query-first\\tests\\TestTargets\\Net5CmdLineTestTarget"
     }
   }
 }

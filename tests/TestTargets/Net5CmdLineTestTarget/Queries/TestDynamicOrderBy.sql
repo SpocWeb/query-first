@@ -1,4 +1,4 @@
 ﻿-- use queryfirst
 
-select * from customers
+select top 1 * from EveryDatatype
 --qforderby

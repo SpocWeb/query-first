@@ -1,5 +1,5 @@
 {
-  "defaultConnection": "Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; ",
+  "defaultConnection": "Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;",
   "provider": "System.Data.SqlClient",
   "connectEditor2DB": true
 }

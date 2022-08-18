@@ -35,7 +35,7 @@ namespace QueryFirst
                 ProjectRoot = overides.ProjectRoot ?? overridden.ProjectRoot,
                 ProjectNamespace = overides.ProjectNamespace ?? overridden.ProjectNamespace
             };
-
+            Console.WriteLine(returnVal.ProjectRoot);
             // helper assemblies. Unlike other config, these cumulate.
             if (overides.HelperAssemblies != null)
             {

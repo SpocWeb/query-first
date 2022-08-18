@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>QueryFirst.CommandLine</RootNamespace>
-    <AssemblyName>QueryFirst.CommandLine</AssemblyName>
+    <AssemblyName>QueryFirst</AssemblyName>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>queryfirst</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>

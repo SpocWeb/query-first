@@ -27,7 +27,7 @@ namespace QueryFirst
             fields.ForEach(field =>
             {
                 if (Regex.Match((field.ColumnName.Substring(0, 1)), "[0-9]").Success)
-                    field.CSColumnName = "_" + field.ColumnName;
+                    field.CSColumnName = "_" + field.ColumnName.Replace(" ","");
                 else
                     field.CSColumnName = field.ColumnName;
                 if (field.ColumnName.IndexOf('?') != -1)

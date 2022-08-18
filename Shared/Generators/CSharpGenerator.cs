@@ -18,7 +18,7 @@ namespace QueryFirst.Generators
             => Path.Combine(
                state._3Config.ProjectRoot,
                options.TryGetValue("OutputDir", out string outputDir) ? outputDir : "",
-               state._1CurrDir.Substring(state._3Config.ProjectRoot.Length + 1),
+               state._1CurrDir.Substring(state._3Config.ProjectRoot.Length).Trim('/').Trim('\\'),
                state._1BaseName + ".sql.cs"
            );
         public QfTextFile Generate(State state, Dictionary<string, string> options)

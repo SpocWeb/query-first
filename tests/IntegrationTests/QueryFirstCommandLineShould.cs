@@ -8,6 +8,7 @@ using Xunit;
 
 namespace IntegrationTests
 {
+    [Collection("QfTestCollection")]
     public class QueryFirstCommandLineShould
     {
         [Fact]
@@ -15,20 +16,26 @@ namespace IntegrationTests
         {
             // Regenerate all
             string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var queryFirstDebugBuild = Path.Combine(assemblyPath, @"../../../../QueryFirst.CommandLine/bin/Debug/net5.0/QueryFirst.exe");
-            var projectToRegenerate = Path.Combine(assemblyPath, @"../../../../Net5CmdLineTestTarget/");
+            var queryFirstDebugBuild = Path.Combine(assemblyPath, @"../../../../../QueryFirst.CommandLine/bin/Debug/net6.0/QueryFirst.exe");
+            var projectToRegenerate = Path.Combine(assemblyPath, @"../../../../TestTargets/Net5CmdLineTestTarget/");
             var result = RunProcess(queryFirstDebugBuild, projectToRegenerate);
-            result.stdOut.Should().Contain("QueryFirst generated wrapper class for GetCustomers.sql");
+            //Assert.Matches(@"^Processed file.*GetOneRow\.sql'\.$", result.stdOut);
+            result.stdOut.Should().Contain("GetOneRow.sql");
             result.stdErr.Should().BeEmpty();
 
             // Build it
             var buildResult = RunProcess("dotnet", "build " + projectToRegenerate);
             buildResult.stdErr.Should().BeEmpty();
-            buildResult.stdOut.Contains("ÉCHEC").Should().BeFalse();
+            buildResult.stdOut.Contains("ÉCHEC").Should().BeFalse("the project should build.");
+            buildResult.stdOut.Contains("FAILED").Should().BeFalse("the project should build.");
 
             // Run it
-            var runResult = RunProcess(Path.Combine(assemblyPath, @"../../../../Net5CmdLineTestTarget/bin/Debug/net5.0/Net5CmdLineTestTarget.exe"));
+            var runResult = RunProcess(Path.Combine(assemblyPath, @"../../../../TestTargets/Net5CmdLineTestTarget/bin/Debug/net5.0/Net5CmdLineTestTarget.exe"));
             runResult.stdErr.Should().BeEmpty();
+            runResult.stdOut.Should().Contain("hello cobber", "GetOneRow should contain 'hello cobber'.");
+            runResult.stdOut.Should().Contain("info message", "ReturnInfoMessage should return this text");
+            runResult.stdOut.Should().Contain("Xavier", "TestDynamicOrderBy should return Xavier, not Antoine.");
+
         }
         private (string stdOut, string stdErr) RunProcess(string filename, string args = "")
         {

@@ -1,3 +1,3 @@
-﻿-- use querfirst
+﻿-- use queryfirst
 
-PRINT 'hello cobber'
+PRINT 'info message for cobber'

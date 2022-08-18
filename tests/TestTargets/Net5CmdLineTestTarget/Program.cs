@@ -7,31 +7,27 @@ using System.Threading.Tasks;
 
 namespace Net5CmdLineTestTarget
 {
+    using Queries;
+    using QueryFirst.IntegrationTests;
+
     public class Program
     {
         public static void Main(string[] args)
         {
-            var result = new GetCustomers().Execute();
-            result.ForEach(l => Console.WriteLine($"{l.ContactName} {l.City}"));
+            var testDB = new QfDbConnectionFactory();
+            var result = new GetOneRowQfRepo(testDB).Execute();
+            result.ForEach(l => Console.WriteLine($"{l.Id} {l.MyChar}"));
 
-            //var infoMsgResult = new ReturnInfoMessage().ExecuteNonQuery();
-
-            // For info messages, the runtime connection needs to be consistent with the design time.
-            // In this project QfRuntimeConnection is System.Data.SqlClient. The following query forces the provider to 
-            // Microsoft.Data.SqlClient, so the runtime connection has to follow.
-            using (var conn = new Microsoft.Data.SqlClient.SqlConnection("Server = localhost\\SQLEXPRESS; Database = NORTHWND; Trusted_Connection = True; "))
-            {
-                conn.Open();
-                var MSInfoMsgResult = new ReturnInfoMessage_MicrosoftData().ExecuteNonQuery(conn);
-            }
-
+            var msgRepo = new ReturnInfoMessageQfRepo(new QfDbConnectionFactory());
+            var infoMsgResult = msgRepo.ExecuteNonQuery();
+            Console.WriteLine(msgRepo.ExecutionMessages);
 
             // Test Dynamic OrderBy
-            var query = new TestDynamicOrderBy();
-            var sorted = query.Execute(new[] { (TestDynamicOrderBy.Cols.ContactName, false) });
-            sorted.ForEach(l => Console.WriteLine($"{l.ContactName} {l.City}"));
+            var query = new TestDynamicOrderByQfRepo(testDB);
+            var sorted = query.Execute(new[] { (TestDynamicOrderByQfRepo.Cols.MyVarchar, true) });
+            Console.WriteLine(sorted[0].MyVarchar); // should be Xavier
 
-            var asyncResult = new GetCustomersAsync().ExecuteAsync().Result;
+            //var asyncResult = new GetCustomersAsync().ExecuteAsync().Result;
 
         }
     }
