@@ -124,6 +124,7 @@ namespace QueryFirst.VSExtension
                     }
                     catch (Exception ex)
                     {
+                        vsOutputWindow.Write($"Exception processing {item.Name}");
                         vsOutputWindow.Write(ex.ToString());
                     }
                 }

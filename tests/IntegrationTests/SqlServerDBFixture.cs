@@ -8,9 +8,9 @@ namespace QueryFirst.IntegrationTests
     using Queries;
     using Xunit;
 
-    public class TestDBFixture : IDisposable
+    public class SqlServerDBFixture : IDisposable
     {
-        public TestDBFixture()
+        public SqlServerDBFixture()
         {
     //        var configuration = new ConfigurationBuilder()
     //.AddInMemoryCollection(appSettingsStub)
@@ -37,8 +37,8 @@ namespace QueryFirst.IntegrationTests
                 myDatetime: DateTime.Now,
                 myChar: "hello cobber",
                 myVarchar: "Antoine",
-                myNchar: "κόσμε",
-                myNvarchar: "κόσμε",
+                myNchar: "loadsa κόσμε",
+                myNvarchar: "async result κόσμε",
                 myBinary: new byte[] {
                     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
                     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -58,7 +58,7 @@ namespace QueryFirst.IntegrationTests
                 myBigint: 9_223_372_036_854_775_807,
                 myBit: true,
                 myDecimal: 1234.567m,
-                myInt: 1234,
+                myInt: 1235,
                 myMoney: 1234,
                 mySmallint: 1234,
                 myTinyint: 255,
@@ -89,6 +89,6 @@ namespace QueryFirst.IntegrationTests
         }
         public void Dispose() { }
     }
-    [CollectionDefinition("QfTestCollection")]
-    public class QfTestCollection : ICollectionFixture<TestDBFixture> { }
+    [CollectionDefinition("SqlServerTestCollection")]
+    public class SqlServerTestCollection : ICollectionFixture<SqlServerDBFixture> { }
 }

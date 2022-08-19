@@ -8,7 +8,7 @@ using Xunit;
 
 namespace IntegrationTests
 {
-    [Collection("QfTestCollection")]
+    [Collection("SqlServerTestCollection")]
     public class QueryFirstCommandLineShould
     {
         [Fact]
@@ -17,7 +17,7 @@ namespace IntegrationTests
             // Regenerate all
             string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var queryFirstDebugBuild = Path.Combine(assemblyPath, @"../../../../../QueryFirst.CommandLine/bin/Debug/net6.0/QueryFirst.exe");
-            var projectToRegenerate = Path.Combine(assemblyPath, @"../../../../TestTargets/Net5CmdLineTestTarget/");
+            var projectToRegenerate = Path.Combine(assemblyPath, @"../../../../TestTargets/SqlServerTestTarget/");
             var result = RunProcess(queryFirstDebugBuild, projectToRegenerate);
             //Assert.Matches(@"^Processed file.*GetOneRow\.sql'\.$", result.stdOut);
             result.stdOut.Should().Contain("GetOneRow.sql");
@@ -30,11 +30,15 @@ namespace IntegrationTests
             buildResult.stdOut.Contains("FAILED").Should().BeFalse("the project should build.");
 
             // Run it
-            var runResult = RunProcess(Path.Combine(assemblyPath, @"../../../../TestTargets/Net5CmdLineTestTarget/bin/Debug/net5.0/Net5CmdLineTestTarget.exe"));
+            var runResult = RunProcess(Path.Combine(assemblyPath, @"../../../../TestTargets/SqlServerTestTarget/bin/Debug/net5.0/SqlServerTestTarget.exe"));
             runResult.stdErr.Should().BeEmpty();
             runResult.stdOut.Should().Contain("hello cobber", "GetOneRow should contain 'hello cobber'.");
             runResult.stdOut.Should().Contain("info message", "ReturnInfoMessage should return this text");
             runResult.stdOut.Should().Contain("Xavier", "TestDynamicOrderBy should return Xavier, not Antoine.");
+            runResult.stdOut.Should().Contain("async result", "GetOneRowAsync should return 'async result'");
+            runResult.stdOut.Should().Contain("loadsa", "LoadsaParameters should return 'loadsa'");
+            runResult.stdOut.Should().Contain("ExpandableIn returns 2 rows");
+            
 
         }
         private (string stdOut, string stdErr) RunProcess(string filename, string args = "")

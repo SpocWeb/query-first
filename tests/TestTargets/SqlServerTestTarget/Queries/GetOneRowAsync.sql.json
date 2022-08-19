@@ -1,0 +1,8 @@
+{
+	"generators": [
+		{
+			"Name": "CSharp",
+			"Options": { "generateAsync": true }
+		}
+	]
+}

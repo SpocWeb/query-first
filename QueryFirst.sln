@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5B44E3B7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestTargets", "TestTargets", "{8777A95E-D3DD-41FD-B5F6-D022AD89D489}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net5CmdLineTestTarget", "Tests\TestTargets\Net5CmdLineTestTarget\Net5CmdLineTestTarget.csproj", "{BBD6B2AE-C1EA-44AA-959A-BAA9A332CAF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerTestTarget", "Tests\TestTargets\SqlServerTestTarget\SqlServerTestTarget.csproj", "{BBD6B2AE-C1EA-44AA-959A-BAA9A332CAF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

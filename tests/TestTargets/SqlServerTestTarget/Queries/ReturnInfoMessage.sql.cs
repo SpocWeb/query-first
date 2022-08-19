@@ -1,4 +1,4 @@
-namespace Net5CmdLineTestTarget.Queries{
+namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
 using System.Data.Common;

@@ -1,4 +1,4 @@
-namespace Net5CmdLineTestTarget.Queries{
+namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
 using System.Data.Common;
@@ -8,46 +8,46 @@ using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using static TestDynamicOrderByQfRepo;
+using static GetOneRowQfRepo;
 
 
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-public interface ITestDynamicOrderByQfRepo{
+public interface IGetOneRowQfRepo{
 
-List<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy);
-IEnumerable< TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null);
-System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy);
-System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null);
+List<GetOneRowQfDto> Execute();
+IEnumerable< GetOneRowQfDto> Execute(IDbConnection conn, IDbTransaction tx = null);
+System.Int32? ExecuteScalar();
+System.Int32? ExecuteScalar(IDbConnection conn, IDbTransaction tx = null);
 
-TestDynamicOrderByQfDto Create(IDataRecord record);
-TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy);
-TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null);
-int ExecuteNonQuery((Cols col, bool descending)[] orderBy);
-int ExecuteNonQuery((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null);
+GetOneRowQfDto Create(IDataRecord record);
+GetOneRowQfDto GetOne();
+GetOneRowQfDto GetOne(IDbConnection conn, IDbTransaction tx = null);
+int ExecuteNonQuery();
+int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
 }
-public partial class TestDynamicOrderByQfRepo : ITestDynamicOrderByQfRepo
+public partial class GetOneRowQfRepo : IGetOneRowQfRepo
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
 protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  TestDynamicOrderByQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+public  GetOneRowQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
     _connectionFactory = connectionFactory;
 }
 
 #region Sync
-public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy)
+public virtual int ExecuteNonQuery()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {
 conn.Open();
-return ExecuteNonQuery(orderBy,conn);
+return ExecuteNonQuery(conn);
 }
 }
-public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
 {
 
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
@@ -57,8 +57,8 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
-AddParameters(orderBy, cmd);
+cmd.CommandText = getCommandText();
+AddParameters( cmd);
 var result = cmd.ExecuteNonQuery();
 
 // Assign output parameters to instance properties. 
@@ -73,68 +73,28 @@ return result;
 
 #endregion
 
-public string getCommandText((Cols col, bool descending)[] orderBy){
-var queryText = $@"-- use queryfirst
-/*designTime
-
+public string getCommandText(){
+var queryText = $@"/* .sql query managed by QueryFirst add-in */
+/*designTime - put parameter declarations and design time initialization here
 endDesignTime*/
-
-select top 1 * from EveryDatatype
---qforderby
-
+SELECT TOP 1 * FROM EveryDatatype E
 ";
-
-// Dynamic order by
-if(orderBy != null && orderBy.Length > 0)
-{
-    var dynamicOrderBy = $" order by {string.Join(", ", orderBy.Select((t)=> $"{t.col} {(t.descending?"desc":"asc")}" ))} ";
-    var pattern = @"--\s*qforderby(.*--\s*endqforderby)?";
-    queryText = Regex.Replace(queryText, pattern, dynamicOrderBy, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-}
 // QfExpandoParams
 
 return queryText;
 }
-
-public enum Cols
-{
-Id = 1,
-MyBigint = 2,
-MyBit = 3,
-MyDecimal = 4,
-MyInt = 5,
-MyMoney = 6,
-MyNumeric = 7,
-MySmallint = 8,
-MyTinyint = 9,
-MyFloat = 10,
-MyReal = 11,
-MyDate = 12,
-MyDatetime2 = 13,
-MyDatetime = 14,
-MyChar = 15,
-MyVarchar = 16,
-MyText = 17,
-MyNchar = 18,
-MyNvarchar = 19,
-MyNtext = 20,
-MyBinary = 21,
-MyVarbinary = 22,
-MyImage = 23
-}
-
 #region Sync
 
-public virtual List<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy)
+public virtual List<GetOneRowQfDto> Execute()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {
 conn.Open();
-var returnVal = Execute(orderBy,conn).ToList();
+var returnVal = Execute(conn).ToList();
 return returnVal;
 }
 }
-public virtual IEnumerable<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null){
+public virtual IEnumerable<GetOneRowQfDto> Execute(IDbConnection conn, IDbTransaction tx = null){
 
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -143,8 +103,8 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
-AddParameters(orderBy, cmd);
+cmd.CommandText = getCommandText();
+AddParameters( cmd);
 using (var reader = cmd.ExecuteReader())
 {
 while (reader.Read())
@@ -161,23 +121,23 @@ yield return Create(reader);
 }
 }
 
-public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy)
+public virtual GetOneRowQfDto GetOne()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {
 conn.Open();
-var returnVal = GetOne(orderBy,conn);
+var returnVal = GetOne(conn);
 return returnVal;
 }
-}public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+}public virtual GetOneRowQfDto GetOne(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
 {
-var all = Execute(orderBy, conn,tx);
-TestDynamicOrderByQfDto returnVal;
-using (IEnumerator<TestDynamicOrderByQfDto> iter = all.GetEnumerator())
+var all = Execute( conn,tx);
+GetOneRowQfDto returnVal;
+using (IEnumerator<GetOneRowQfDto> iter = all.GetEnumerator())
 {
 iter.MoveNext();
 returnVal = iter.Current;
@@ -185,12 +145,12 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
-public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy)
+public virtual System.Int32? ExecuteScalar()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {
 conn.Open();
-var returnVal = ExecuteScalar(orderBy,conn);
+var returnVal = ExecuteScalar(conn);
 /*
 ;
 */
@@ -198,7 +158,7 @@ return returnVal;
 }
 }
 
-public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+public virtual System.Int32? ExecuteScalar(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -207,8 +167,8 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
-AddParameters(orderBy, cmd);
+cmd.CommandText = getCommandText();
+AddParameters( cmd);
 var result = cmd.ExecuteScalar();
 
 // only convert dbnull if nullable
@@ -226,7 +186,7 @@ return (System.Int32?)result;
 
 #endregion
 
-public virtual TestDynamicOrderByQfDto Create(IDataRecord record)
+public virtual GetOneRowQfDto Create(IDataRecord record)
 {
 var returnVal = CreatePoco(record);
 
@@ -303,15 +263,15 @@ var returnVal = CreatePoco(record);
 returnVal.OnLoad();
 return returnVal;
 }
-protected virtual TestDynamicOrderByQfDto CreatePoco(System.Data.IDataRecord record)
+protected virtual GetOneRowQfDto CreatePoco(System.Data.IDataRecord record)
 {
-    return new TestDynamicOrderByQfDto();
+    return new GetOneRowQfDto();
 }
-protected void AddParameters((Cols col, bool descending)[] orderBy,IDbCommand cmd)
+protected void AddParameters(IDbCommand cmd)
 {
 }
 }
-public partial class TestDynamicOrderByQfDto  {
+public partial class GetOneRowQfDto  {
 protected int _Id; // int(4) not null
 public int Id{
 get{return _Id;}
