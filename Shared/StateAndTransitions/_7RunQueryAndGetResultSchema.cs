@@ -24,6 +24,8 @@ namespace QueryFirst
             {
                 fields = _provider.GetQuerySchema2ndAttempt(state._6QueryWithParamsAdded, state._3Config.DefaultConnection);
             }
+            if (fields == null)
+                fields = new List<ResultFieldDetails>();
             fields.ForEach(field =>
             {
                 if (Regex.Match((field.ColumnName.Substring(0, 1)), "[0-9]").Success)

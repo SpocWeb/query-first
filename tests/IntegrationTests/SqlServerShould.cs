@@ -9,7 +9,7 @@ using Xunit;
 namespace IntegrationTests
 {
     [Collection("SqlServerTestCollection")]
-    public class QueryFirstCommandLineShould
+    public class SqlServerShould
     {
         [Fact]
         public void RegenerateAll_ShouldRegenerateAllAndBuildAndRun()
