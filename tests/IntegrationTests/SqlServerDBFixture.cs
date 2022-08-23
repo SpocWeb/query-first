@@ -15,8 +15,8 @@ namespace QueryFirst.IntegrationTests
     //        var configuration = new ConfigurationBuilder()
     //.AddInMemoryCollection(appSettingsStub)
     //.Build();
-            var testDB = new QfDbConnectionFactory();
-            var master = new MasterConnectionFactory();
+            var testDB = new TestDB();
+            var master = new MasterDB();
 
             //new DropAndCreateTestDBQfRepo(master).ExecuteNonQuery();
             new DeleteAllQfRepo(testDB).ExecuteNonQuery();

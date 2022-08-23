@@ -1,9 +1,9 @@
-﻿using System.Data;
+﻿//using System.Data;
 
-namespace QueryFirst
-{
-    internal interface IQfDbConnectionFactory
-    {
-        IDbConnection CreateConnection();
-    }
-}
+//namespace QueryFirst
+//{
+//    internal interface IQfDbConnectionFactory
+//    {
+//        IDbConnection CreateConnection();
+//    }
+//}

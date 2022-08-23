@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 
 using static ExpandableInQfRepo;
@@ -28,17 +29,30 @@ int ExecuteNonQuery(List<int?> listOfInts);
 int ExecuteNonQuery(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null);
 }
 public partial class ExpandableInQfRepo : IExpandableInQfRepo
+
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  ExpandableInQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  ExpandableInQfRepo(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{
     _connectionFactory = connectionFactory;
+}
+private static IExpandableInQfRepo _inst;
+private static IExpandableInQfRepo inst { get
+{
+if (_inst == null)
+_inst = new ExpandableInQfRepo(QueryFirstConnectionFactory.Instance);
+return _inst;
+}
 }
 
 #region Sync
+
+public static int ExecuteNonQueryStatic(List<int?> listOfInts)
+=> inst.ExecuteNonQuery(listOfInts);
 public virtual int ExecuteNonQuery(List<int?> listOfInts)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -47,6 +61,9 @@ conn.Open();
 return ExecuteNonQuery(listOfInts, conn);
 }
 }
+
+public static int ExecuteNonQueryStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(listOfInts, conn, tx);
 public virtual int ExecuteNonQuery(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
 {
 
@@ -89,6 +106,10 @@ return queryText;
 }
 #region Sync
 
+
+public static List<ExpandableInQfDto> ExecuteStatic(List<int?> listOfInts)
+=> inst.Execute(listOfInts);
+
 public virtual List<ExpandableInQfDto> Execute(List<int?> listOfInts)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -98,8 +119,12 @@ var returnVal = Execute(listOfInts, conn).ToList();
 return returnVal;
 }
 }
-public virtual IEnumerable<ExpandableInQfDto> Execute(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null){
 
+public static IEnumerable<ExpandableInQfDto> ExecuteStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute(listOfInts, conn, tx);
+
+public virtual IEnumerable<ExpandableInQfDto> Execute(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+{
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
@@ -125,6 +150,9 @@ yield return Create(reader);
 }
 }
 
+
+public static ExpandableInQfDto GetOneStatic(List<int?> listOfInts)
+=> inst.GetOne(listOfInts);
 public virtual ExpandableInQfDto GetOne(List<int?> listOfInts)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -133,7 +161,10 @@ conn.Open();
 var returnVal = GetOne(listOfInts, conn);
 return returnVal;
 }
-}public virtual ExpandableInQfDto GetOne(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+}
+public static ExpandableInQfDto GetOneStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne(listOfInts, conn, tx);
+public virtual ExpandableInQfDto GetOne(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -149,6 +180,9 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
+
+public static System.Int32? ExecuteScalarStatic(List<int?> listOfInts)
+=> inst.ExecuteScalar(listOfInts);
 public virtual System.Int32? ExecuteScalar(List<int?> listOfInts)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -162,6 +196,9 @@ return returnVal;
 }
 }
 
+
+public static System.Int32? ExecuteScalarStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar(listOfInts, conn, tx);
 public virtual System.Int32? ExecuteScalar(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.

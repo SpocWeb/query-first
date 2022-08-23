@@ -20,5 +20,8 @@
     <ProjectCapability Include="DynamicDependentFile" />
     <ProjectCapability Include="DynamicFileNesting" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\QueryFirst.Runtime\QueryFirst.Runtime.csproj" />
+  </ItemGroup>
 
 </Project>

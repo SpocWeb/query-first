@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 
 using static TestDynamicOrderByQfRepo;
@@ -28,17 +29,30 @@ int ExecuteNonQuery((Cols col, bool descending)[] orderBy);
 int ExecuteNonQuery((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null);
 }
 public partial class TestDynamicOrderByQfRepo : ITestDynamicOrderByQfRepo
+
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  TestDynamicOrderByQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  TestDynamicOrderByQfRepo(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{
     _connectionFactory = connectionFactory;
+}
+private static ITestDynamicOrderByQfRepo _inst;
+private static ITestDynamicOrderByQfRepo inst { get
+{
+if (_inst == null)
+_inst = new TestDynamicOrderByQfRepo(QueryFirstConnectionFactory.Instance);
+return _inst;
+}
 }
 
 #region Sync
+
+public static int ExecuteNonQueryStatic((Cols col, bool descending)[] orderBy)
+=> inst.ExecuteNonQuery(orderBy);
 public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -47,6 +61,9 @@ conn.Open();
 return ExecuteNonQuery(orderBy,conn);
 }
 }
+
+public static int ExecuteNonQueryStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(orderBy,conn, tx);
 public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
 {
 
@@ -125,6 +142,10 @@ MyImage = 23
 
 #region Sync
 
+
+public static List<TestDynamicOrderByQfDto> ExecuteStatic((Cols col, bool descending)[] orderBy)
+=> inst.Execute(orderBy);
+
 public virtual List<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -134,8 +155,12 @@ var returnVal = Execute(orderBy,conn).ToList();
 return returnVal;
 }
 }
-public virtual IEnumerable<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null){
 
+public static IEnumerable<TestDynamicOrderByQfDto> ExecuteStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute(orderBy,conn, tx);
+
+public virtual IEnumerable<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+{
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
@@ -161,6 +186,9 @@ yield return Create(reader);
 }
 }
 
+
+public static TestDynamicOrderByQfDto GetOneStatic((Cols col, bool descending)[] orderBy)
+=> inst.GetOne(orderBy);
 public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -169,7 +197,10 @@ conn.Open();
 var returnVal = GetOne(orderBy,conn);
 return returnVal;
 }
-}public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+}
+public static TestDynamicOrderByQfDto GetOneStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne(orderBy,conn, tx);
+public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -185,6 +216,9 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
+
+public static System.Int32? ExecuteScalarStatic((Cols col, bool descending)[] orderBy)
+=> inst.ExecuteScalar(orderBy);
 public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -198,6 +232,9 @@ return returnVal;
 }
 }
 
+
+public static System.Int32? ExecuteScalarStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar(orderBy,conn, tx);
 public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.

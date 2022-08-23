@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 
 using static InsertQfRepo;
@@ -28,17 +29,30 @@ int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt,
 int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null);
 }
 public partial class InsertQfRepo : IInsertQfRepo
+
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  InsertQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  InsertQfRepo(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{
     _connectionFactory = connectionFactory;
+}
+private static IInsertQfRepo _inst;
+private static IInsertQfRepo inst { get
+{
+if (_inst == null)
+_inst = new InsertQfRepo(QueryFirstConnectionFactory.Instance);
+return _inst;
+}
 }
 
 #region Sync
+
+public static int ExecuteNonQueryStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
+=> inst.ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary);
 public virtual int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -47,6 +61,9 @@ conn.Open();
 return ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn);
 }
 }
+
+public static int ExecuteNonQueryStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn, tx);
 public virtual int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
 {
 
@@ -146,6 +163,10 @@ return queryText;
 }
 #region Sync
 
+
+public static List<InsertQfDto> ExecuteStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
+=> inst.Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary);
+
 public virtual List<InsertQfDto> Execute(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -155,8 +176,12 @@ var returnVal = Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, 
 return returnVal;
 }
 }
-public virtual IEnumerable<InsertQfDto> Execute(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null){
 
+public static IEnumerable<InsertQfDto> ExecuteStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn, tx);
+
+public virtual IEnumerable<InsertQfDto> Execute(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+{
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
@@ -182,6 +207,9 @@ yield return Create(reader);
 }
 }
 
+
+public static InsertQfDto GetOneStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
+=> inst.GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary);
 public virtual InsertQfDto GetOne(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -190,7 +218,10 @@ conn.Open();
 var returnVal = GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn);
 return returnVal;
 }
-}public virtual InsertQfDto GetOne(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+}
+public static InsertQfDto GetOneStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn, tx);
+public virtual InsertQfDto GetOne(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -206,6 +237,9 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
+
+public static System.Int32? ExecuteScalarStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
+=> inst.ExecuteScalar(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary);
 public virtual System.Int32? ExecuteScalar(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -219,6 +253,9 @@ return returnVal;
 }
 }
 
+
+public static System.Int32? ExecuteScalarStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime2, myDatetime, myChar, myVarchar, myNchar, myNvarchar, myBinary, myVarbinary, conn, tx);
 public virtual System.Int32? ExecuteScalar(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime2, DateTime? myDatetime, string myChar, string myVarchar, string myNchar, string myNvarchar, System.Byte[] myBinary, System.Byte[] myVarbinary, IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.

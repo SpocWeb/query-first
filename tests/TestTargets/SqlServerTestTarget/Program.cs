@@ -8,15 +8,19 @@ using System.Threading.Tasks;
 namespace SqlServerTestTarget
 {
     using Queries;
+    using QueryFirst;
     using QueryFirst.IntegrationTests;
 
     public class Program
     {
         public static void Main(string[] args)
         {
-            var testDB = new QfDbConnectionFactory();
+            var testDB = new TestDB();
             var result = new GetOneRowQfRepo(testDB).Execute();
             result.ForEach(l => Console.WriteLine($"{l.Id} {l.MyChar}"));
+
+            // static
+            var staticResult = GetOneRowQfRepo.ExecuteStatic();
 
             var msgRepo = new ReturnInfoMessageQfRepo(testDB);
             var infoMsgResult = msgRepo.ExecuteNonQuery();
@@ -51,7 +55,13 @@ namespace SqlServerTestTarget
              Console.WriteLine(carefullySelectedResult);
             var expandableIn = new ExpandableInQfRepo(testDB).Execute(new List<int?> { 1234, 1235 });
             Console.WriteLine($"ExpandableIn returns {expandableIn.Count} rows");
+
+            var staticRslt = GetOneRowAsyncQfRepo.ExecuteStatic();
         }
+    }
+    public static class QueryfirstDefaultConnection
+    {
+        public static string ConnectionString;
     }
 
 }

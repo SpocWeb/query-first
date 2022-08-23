@@ -8,6 +8,10 @@
     "RebuildNet5TestTarget": {
       "commandName": "Project",
       "workingDirectory": "C:\\Users\\sboddy\\source\\repos\\query-first\\tests\\TestTargets\\SqlServerTestTarget"
+    },
+    "RebuildIntegrationTests": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\sboddy\\source\\repos\\query-first\\tests\\IntegrationTests"
     }
   }
 }

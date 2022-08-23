@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 
 using static GetOneRowAsyncQfRepo;
@@ -39,17 +40,30 @@ Task<int> ExecuteNonQueryAsync(IDbConnection conn, IDbTransaction tx = null);
 # endregion
 }
 public partial class GetOneRowAsyncQfRepo : IGetOneRowAsyncQfRepo
+
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  GetOneRowAsyncQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  GetOneRowAsyncQfRepo(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{
     _connectionFactory = connectionFactory;
+}
+private static IGetOneRowAsyncQfRepo _inst;
+private static IGetOneRowAsyncQfRepo inst { get
+{
+if (_inst == null)
+_inst = new GetOneRowAsyncQfRepo(QueryFirstConnectionFactory.Instance);
+return _inst;
+}
 }
 
 #region Sync
+
+public static int ExecuteNonQueryStatic()
+=> inst.ExecuteNonQuery();
 public virtual int ExecuteNonQuery()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -58,6 +72,9 @@ conn.Open();
 return ExecuteNonQuery(conn);
 }
 }
+
+public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(conn, tx);
 public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
 {
 
@@ -87,6 +104,10 @@ return result;
 
 #region ASync
 
+
+public static async Task<int> ExecuteNonQueryStaticAsync()
+=> await inst.ExecuteNonQueryAsync();
+
 public virtual async Task<int> ExecuteNonQueryAsync()
 {
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
@@ -99,6 +120,10 @@ var returnVal = await ExecuteNonQueryAsync( conn);
 return returnVal;
 }
 }
+
+public static async Task<int> ExecuteNonQueryStaticAsync(IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteNonQueryAsync(conn, tx);
+
 public virtual async Task<int> ExecuteNonQueryAsync(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
@@ -136,6 +161,10 @@ return queryText;
 }
 #region Sync
 
+
+public static List<GetOneRowAsyncQfDto> ExecuteStatic()
+=> inst.Execute();
+
 public virtual List<GetOneRowAsyncQfDto> Execute()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -145,8 +174,12 @@ var returnVal = Execute(conn).ToList();
 return returnVal;
 }
 }
-public virtual IEnumerable<GetOneRowAsyncQfDto> Execute(IDbConnection conn, IDbTransaction tx = null){
 
+public static IEnumerable<GetOneRowAsyncQfDto> ExecuteStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute(conn, tx);
+
+public virtual IEnumerable<GetOneRowAsyncQfDto> Execute(IDbConnection conn, IDbTransaction tx = null)
+{
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
@@ -172,6 +205,9 @@ yield return Create(reader);
 }
 }
 
+
+public static GetOneRowAsyncQfDto GetOneStatic()
+=> inst.GetOne();
 public virtual GetOneRowAsyncQfDto GetOne()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -180,7 +216,10 @@ conn.Open();
 var returnVal = GetOne(conn);
 return returnVal;
 }
-}public virtual GetOneRowAsyncQfDto GetOne(IDbConnection conn, IDbTransaction tx = null)
+}
+public static GetOneRowAsyncQfDto GetOneStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne(conn, tx);
+public virtual GetOneRowAsyncQfDto GetOne(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -196,6 +235,9 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
+
+public static System.String ExecuteScalarStatic()
+=> inst.ExecuteScalar();
 public virtual System.String ExecuteScalar()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -209,6 +251,9 @@ return returnVal;
 }
 }
 
+
+public static System.String ExecuteScalarStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar(conn, tx);
 public virtual System.String ExecuteScalar(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
@@ -239,6 +284,9 @@ return (System.String)result;
 
 #region ASync
 
+
+public static async Task<List<GetOneRowAsyncQfDto>> ExecuteStaticAsync()
+=> await inst.ExecuteAsync();
 public virtual async Task<List<GetOneRowAsyncQfDto>> ExecuteAsync()
 {
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
@@ -251,6 +299,10 @@ var returnVal = await ExecuteAsync(conn);
 return returnVal.ToList();
 }
 }
+
+public static async Task<IEnumerable<GetOneRowAsyncQfDto>> ExecuteStaticAsync( IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteAsync(conn, tx);
+
 public virtual async Task<IEnumerable<GetOneRowAsyncQfDto>> ExecuteAsync( IDbConnection conn, IDbTransaction tx = null){
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -282,6 +334,10 @@ IEnumerable<GetOneRowAsyncQfDto> ReadItems(SqlDataReader reader)
 }
 
 
+
+public static async Task<GetOneRowAsyncQfDto> GetOneStaticAsync()
+=> await inst.GetOneAsync();
+
 public virtual async Task<GetOneRowAsyncQfDto> GetOneAsync()
 {
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
@@ -290,6 +346,10 @@ using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
     return await GetOneAsync( conn);
 }
 }
+
+public static async Task<GetOneRowAsyncQfDto> GetOneStaticAsync(IDbConnection conn, IDbTransaction tx = null)
+=> await inst.GetOneAsync(conn, tx );
+
 public virtual async Task<GetOneRowAsyncQfDto> GetOneAsync(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
@@ -304,6 +364,10 @@ returnVal = iter.Current;
 }
 return returnVal;
 }
+
+public static async Task<System.String> ExecuteScalarStaticAsync()
+=> await inst.ExecuteScalarAsync();
+
 public virtual async Task<System.String> ExecuteScalarAsync()
 {
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
@@ -316,6 +380,10 @@ var returnVal = await ExecuteScalarAsync( conn);
 return returnVal;
 }
 }
+
+
+public static async Task<System.String> ExecuteScalarStaticAsync( IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteScalarAsync(conn, tx);
 
 public virtual async Task<System.String> ExecuteScalarAsync( IDbConnection conn, IDbTransaction tx = null)
 {

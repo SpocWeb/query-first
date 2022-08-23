@@ -19,6 +19,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 {n}using static {QfRepoClassName(state._1BaseName)};
 {(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}
@@ -36,14 +37,24 @@ using System.Text.RegularExpressions;
         public virtual string StartClass(State state)
         {
             return
-$@"public partial class {QfRepoClassName(state._1BaseName)} : I{QfRepoClassName(state._1BaseName)}{Environment.NewLine}{{
+$@"public partial class {QfRepoClassName(state._1BaseName)} : I{QfRepoClassName(state._1BaseName)}{Environment.NewLine}
+{{
 
 void AppendExececutionMessage(string msg) {{ ExecutionMessages += msg + Environment.NewLine; }}
 public string ExecutionMessages {{ get; protected set; }}
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  {QfRepoClassName(state._1BaseName)}(QueryFirst.IQfDbConnectionFactory connectionFactory){{
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  {QfRepoClassName(state._1BaseName)}(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{{
     _connectionFactory = connectionFactory;
+}}
+private static I{QfRepoClassName(state._1BaseName)} _inst;
+private static I{QfRepoClassName(state._1BaseName)} inst {{ get
+{{
+if (_inst == null)
+_inst = new {QfRepoClassName(state._1BaseName)}(QueryFirstConnectionFactory.Instance);
+return _inst;
+}}
 }}
 ";
 
@@ -53,8 +64,11 @@ public  {QfRepoClassName(state._1BaseName)}(QueryFirst.IQfDbConnectionFactory co
             StringBuilder code = new StringBuilder();
             char[] spaceComma = new char[] { ',', ' ' };
             // Execute method, without connection
-            code.AppendLine(
-$@"public virtual List<{state._4ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)}){n}{{
+            code.AppendLine($@"
+public static List<{state._4ResultInterfaceName}> ExecuteStatic({state._8MethodSignature.Trim(spaceComma)})
+=> inst.Execute({state._8CallingArgs.Trim(spaceComma)});
+
+public virtual List<{state._4ResultInterfaceName}> Execute({state._8MethodSignature.Trim(spaceComma)}){n}{{
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {{
 conn.Open();
@@ -67,9 +81,12 @@ return returnVal;
         public virtual string MakeExecuteWithConn(State state)
         {
             StringBuilder code = new StringBuilder();
-            code.AppendLine(
-$@"public virtual IEnumerable<{state._4ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null){{
+            code.AppendLine($@"
+public static IEnumerable<{state._4ResultInterfaceName}> ExecuteStatic({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute({state._8CallingArgs}conn, tx);
 
+public virtual IEnumerable<{state._4ResultInterfaceName}> Execute({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+{{
 {state._8HookupExecutionMessagesMethodText}
 using(IDbCommand cmd = conn.CreateCommand())
 {{
@@ -103,8 +120,10 @@ yield return Create(reader);
             {
                 char[] spaceComma = new char[] { ',', ' ' };
                 string code = "";
-                code +=
-$@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})
+                code += $@"
+public static {state._4ResultInterfaceName} GetOneStatic({state._8MethodSignature.Trim(spaceComma)})
+=> inst.GetOne({state._8CallingArgs.Trim(spaceComma)});
+public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {{
@@ -125,8 +144,10 @@ return returnVal;
             if (state._8QueryParams.Where(qp => qp.IsOutput).Count() == 0)
             {
 
-                code +=
-$@"public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+                code += $@"
+public static {state._4ResultInterfaceName} GetOneStatic({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne({state._8CallingArgs}conn, tx);
+public virtual {state._4ResultInterfaceName} GetOne({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {state._8HookupExecutionMessagesMethodText}
 {{
@@ -149,8 +170,10 @@ return returnVal;
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
             //ExecuteScalar without connection
-            code.AppendLine(
-$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
+            code.AppendLine( $@"
+public static {state._7ExecuteScalarReturnType} ExecuteScalarStatic({state._8MethodSignature.Trim(spaceComma)})
+=> inst.ExecuteScalar({state._8CallingArgs.Trim(spaceComma)});
+public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {{
@@ -170,8 +193,10 @@ return returnVal;
         public virtual string MakeExecuteScalarWithConn(State state)
         {
             StringBuilder code = new StringBuilder();
-            code.AppendLine(
-$@"public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+            code.AppendLine( $@"
+public static {state._7ExecuteScalarReturnType} ExecuteScalarStatic({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar({state._8CallingArgs}conn, tx);
+public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {state._8HookupExecutionMessagesMethodText}
 using(IDbCommand cmd = conn.CreateCommand())
@@ -201,8 +226,10 @@ return ({state._7ExecuteScalarReturnType})result;
         public virtual string MakeExecuteNonQueryWithoutConn(State state)
         {
             string code = "";
-            code +=
-            $@"public virtual int ExecuteNonQuery({state._8MethodSignature.Trim(spaceComma)})
+            code += $@"
+public static int ExecuteNonQueryStatic({state._8MethodSignature.Trim(spaceComma)})
+=> inst.ExecuteNonQuery({state._8CallingArgs.Trim(spaceComma)});
+public virtual int ExecuteNonQuery({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {{
@@ -217,8 +244,10 @@ return ExecuteNonQuery({state._8CallingArgs}conn);
         {
             StringBuilder code = new StringBuilder();
             // ExecuteNonQuery() with connection
-            code.AppendLine(
-$@"public virtual int ExecuteNonQuery({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+            code.AppendLine($@"
+public static int ExecuteNonQueryStatic({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery({state._8CallingArgs}conn, tx);
+public virtual int ExecuteNonQuery({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 
 {state._8HookupExecutionMessagesMethodText}
@@ -452,12 +481,7 @@ Task<int> ExecuteNonQueryAsync(" + state._8MethodSignature + @"IDbConnection con
         }
 
         public string SelfTestUsings(State state)
-        {
-            return
-    @"using QueryFirst;
-using Xunit;
-";
-        }
+            => $@"using Xunit;{n}";
 
         public string MakeSelfTestMethod(State state)
         {

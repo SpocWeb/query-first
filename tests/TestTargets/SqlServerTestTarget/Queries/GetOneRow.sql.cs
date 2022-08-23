@@ -6,6 +6,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using QueryFirst;
 using System.Text.RegularExpressions;
 
 using static GetOneRowQfRepo;
@@ -28,17 +29,30 @@ int ExecuteNonQuery();
 int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
 }
 public partial class GetOneRowQfRepo : IGetOneRowQfRepo
+
 {
 
 void AppendExececutionMessage(string msg) { ExecutionMessages += msg + Environment.NewLine; }
 public string ExecutionMessages { get; protected set; }
 // constructor with connection factory injection
-protected QueryFirst.IQfDbConnectionFactory _connectionFactory;
-public  GetOneRowQfRepo(QueryFirst.IQfDbConnectionFactory connectionFactory){
+protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
+public  GetOneRowQfRepo(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+{
     _connectionFactory = connectionFactory;
+}
+private static IGetOneRowQfRepo _inst;
+private static IGetOneRowQfRepo inst { get
+{
+if (_inst == null)
+_inst = new GetOneRowQfRepo(QueryFirstConnectionFactory.Instance);
+return _inst;
+}
 }
 
 #region Sync
+
+public static int ExecuteNonQueryStatic()
+=> inst.ExecuteNonQuery();
 public virtual int ExecuteNonQuery()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -47,6 +61,9 @@ conn.Open();
 return ExecuteNonQuery(conn);
 }
 }
+
+public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(conn, tx);
 public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
 {
 
@@ -85,6 +102,10 @@ return queryText;
 }
 #region Sync
 
+
+public static List<GetOneRowQfDto> ExecuteStatic()
+=> inst.Execute();
+
 public virtual List<GetOneRowQfDto> Execute()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -94,8 +115,12 @@ var returnVal = Execute(conn).ToList();
 return returnVal;
 }
 }
-public virtual IEnumerable<GetOneRowQfDto> Execute(IDbConnection conn, IDbTransaction tx = null){
 
+public static IEnumerable<GetOneRowQfDto> ExecuteStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.Execute(conn, tx);
+
+public virtual IEnumerable<GetOneRowQfDto> Execute(IDbConnection conn, IDbTransaction tx = null)
+{
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });
@@ -121,6 +146,9 @@ yield return Create(reader);
 }
 }
 
+
+public static GetOneRowQfDto GetOneStatic()
+=> inst.GetOne();
 public virtual GetOneRowQfDto GetOne()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -129,7 +157,10 @@ conn.Open();
 var returnVal = GetOne(conn);
 return returnVal;
 }
-}public virtual GetOneRowQfDto GetOne(IDbConnection conn, IDbTransaction tx = null)
+}
+public static GetOneRowQfDto GetOneStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.GetOne(conn, tx);
+public virtual GetOneRowQfDto GetOne(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
@@ -145,6 +176,9 @@ returnVal = iter.Current;
 return returnVal;
 }
 }
+
+public static System.Int32? ExecuteScalarStatic()
+=> inst.ExecuteScalar();
 public virtual System.Int32? ExecuteScalar()
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
@@ -158,6 +192,9 @@ return returnVal;
 }
 }
 
+
+public static System.Int32? ExecuteScalarStatic(IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteScalar(conn, tx);
 public virtual System.Int32? ExecuteScalar(IDbConnection conn, IDbTransaction tx = null)
 {
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.

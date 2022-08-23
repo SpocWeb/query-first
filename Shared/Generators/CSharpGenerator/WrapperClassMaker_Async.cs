@@ -13,8 +13,11 @@ namespace QueryFirst.Generators
             StringBuilder code = new StringBuilder();
             char[] spaceComma = new char[] { ',', ' ' };
             // Execute method, without connection
-            code.AppendLine(
-$@"public virtual async Task<List<{state._4ResultInterfaceName}>> ExecuteAsync({state._8MethodSignature.Trim(spaceComma)}){n}{{
+            code.AppendLine( $@"
+public static async Task<List<{state._4ResultInterfaceName}>> ExecuteStaticAsync({state._8MethodSignature.Trim(spaceComma)})
+=> await inst.ExecuteAsync({state._8CallingArgs});
+public virtual async Task<List<{state._4ResultInterfaceName}>> ExecuteAsync({state._8MethodSignature.Trim(spaceComma)})
+{{
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
 {{
 await conn.OpenAsync();
@@ -32,8 +35,11 @@ return returnVal.ToList();
         {
             StringBuilder code = new StringBuilder();
             // Execute method with connection. Use properties. First variant assigns props, then calls inner exec with no args.
-            code.AppendLine(
-$@"public virtual async Task<IEnumerable<{state._4ResultInterfaceName}>> ExecuteAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null){{
+            code.AppendLine($@"
+public static async Task<IEnumerable<{state._4ResultInterfaceName}>> ExecuteStaticAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteAsync({state._8CallingArgs}conn, tx);
+
+public virtual async Task<IEnumerable<{state._4ResultInterfaceName}>> ExecuteAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null){{
 {state._8HookupExecutionMessagesMethodText}
 using (DbCommand cmd = ((SqlConnection)conn).CreateCommand())
 {{
@@ -73,8 +79,11 @@ IEnumerable<{state._4ResultInterfaceName}> ReadItems(SqlDataReader reader)
             // don't make GetOne if there are output params.
             if (state._8QueryParams.Where(qp => qp.IsOutput).Count() == 0)
             {
-                code +=
-$@"public virtual async Task<{state._4ResultInterfaceName}> GetOneAsync({state._8MethodSignature.Trim(spaceComma)})
+                code += $@"
+public static async Task<{state._4ResultInterfaceName}> GetOneStaticAsync({state._8MethodSignature.Trim(spaceComma)})
+=> await inst.GetOneAsync({state._8CallingArgs.Trim(spaceComma)});
+
+public virtual async Task<{state._4ResultInterfaceName}> GetOneAsync({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
 {{
@@ -94,8 +103,11 @@ using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
             {
                 // GetOne() with connection
 
-                code +=
-$@"public virtual async Task<{state._4ResultInterfaceName}> GetOneAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+                code += $@"
+public static async Task<{state._4ResultInterfaceName}> GetOneStaticAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> await inst.GetOneAsync({state._8CallingArgs}conn, tx );
+
+public virtual async Task<{state._4ResultInterfaceName}> GetOneAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {state._8HookupExecutionMessagesMethodText}
 var all = await ExecuteAsync({state._8CallingArgs} conn,tx);
@@ -116,8 +128,11 @@ return returnVal;
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
             //ExecuteScalar without connection
-            code.AppendLine(
-$@"public virtual async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarAsync({state._8MethodSignature.Trim(spaceComma)})
+            code.AppendLine($@"
+public static async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarStaticAsync({state._8MethodSignature.Trim(spaceComma)})
+=> await inst.ExecuteScalarAsync({state._8CallingArgs});
+
+public virtual async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarAsync({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
 {{
@@ -137,8 +152,11 @@ return returnVal;
         {
             StringBuilder code = new StringBuilder();
             // ExecuteScalar() with connection
-            code.AppendLine(
-$@"public virtual async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null)
+            code.AppendLine($@"
+public static async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarStaticAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteScalarAsync({state._8CallingArgs}conn, tx);
+
+public virtual async Task<{state._7ExecuteScalarReturnType}> ExecuteScalarAsync({state._8MethodSignature} IDbConnection conn, IDbTransaction tx = null)
 {{
 using(DbCommand cmd = ((SqlConnection)conn).CreateCommand())
 {{
@@ -170,8 +188,11 @@ return ({state._7ExecuteScalarReturnType})result;
             char[] spaceComma = new char[] { ',', ' ' };
             //ExecuteScalar without connection
             string code = "";
-            code +=
-            $@"public virtual async Task<int> ExecuteNonQueryAsync({state._8MethodSignature.Trim(spaceComma)})
+            code += $@"
+public static async Task<int> ExecuteNonQueryStaticAsync({state._8MethodSignature.Trim(spaceComma)})
+=> await inst.ExecuteNonQueryAsync({state._8CallingArgs.Trim(spaceComma)});
+
+public virtual async Task<int> ExecuteNonQueryAsync({state._8MethodSignature.Trim(spaceComma)})
 {{
 using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
 {{
@@ -190,8 +211,11 @@ return returnVal;
         {
             StringBuilder code = new StringBuilder();
             // ExecuteNonQuery() with connection
-            code.AppendLine(
-$@"public virtual async Task<int> ExecuteNonQueryAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+            code.AppendLine($@"
+public static async Task<int> ExecuteNonQueryStaticAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
+=> await inst.ExecuteNonQueryAsync({state._8CallingArgs}conn, tx);
+
+public virtual async Task<int> ExecuteNonQueryAsync({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 {{
 {state._8HookupExecutionMessagesMethodText}
 using(DbCommand cmd = ((SqlConnection)conn).CreateCommand())
