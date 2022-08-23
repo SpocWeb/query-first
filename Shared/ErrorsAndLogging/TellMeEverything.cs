@@ -7,7 +7,7 @@ namespace QueryFirst
         public static string TellMeEverything(this Exception ex, string indent = "")
         {
             return "\r\n" + indent + ex.Message + "\r\n"
-                + indent + ex?.StackTrace.Replace("\r\n", "\r\n" + indent)
+                + indent + ex?.StackTrace?.Replace("\r\n", "\r\n" + indent)
                 + ex?.InnerException?.TellMeEverything(indent + "  ");
         }
     }

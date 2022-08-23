@@ -3,6 +3,7 @@ using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -14,17 +15,22 @@ namespace IntegrationTests
         [Fact]
         public void RegenerateAll_ShouldRegenerateAllAndBuildAndRun()
         {
-            // Regenerate all
+            // Clean
             string assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var queryFirstDebugBuild = Path.Combine(assemblyPath, @"../../../../../QueryFirst.CommandLine/bin/Debug/net6.0/QueryFirst.exe");
             var projectToRegenerate = Path.Combine(assemblyPath, @"../../../../TestTargets/SqlServerTestTarget/");
+
+            Directory.GetFiles(projectToRegenerate, "*.sql.cs", SearchOption.AllDirectories).ToList().ForEach(f => File.Delete(f));
+            Directory.Delete(Path.Combine(projectToRegenerate, "bin"), true);
+            // Regenerate all
+            var queryFirstDebugBuild = Path.Combine(assemblyPath, @"../../../../../QueryFirst.CommandLine/bin/Debug/net6.0/QueryFirst.exe");
             var result = RunProcess(queryFirstDebugBuild, projectToRegenerate);
+
             //Assert.Matches(@"^Processed file.*GetOneRow\.sql'\.$", result.stdOut);
             result.stdOut.Should().Contain("GetOneRow.sql");
             result.stdErr.Should().BeEmpty();
 
             // Build it
-            var buildResult = RunProcess("dotnet", "build " + projectToRegenerate);
+            var buildResult = RunProcess("dotnet", $"build {projectToRegenerate} -c Debug");
             buildResult.stdErr.Should().BeEmpty();
             buildResult.stdOut.Contains("ÉCHEC").Should().BeFalse("the project should build.");
             buildResult.stdOut.Contains("FAILED").Should().BeFalse("the project should build.");

@@ -20,6 +20,7 @@ namespace SqlServerTestTarget
             result.ForEach(l => Console.WriteLine($"{l.Id} {l.MyChar}"));
 
             // static
+            QueryFirstConnectionFactory.Instance = testDB;
             var staticResult = GetOneRowQfRepo.ExecuteStatic();
 
             var msgRepo = new ReturnInfoMessageQfRepo(testDB);

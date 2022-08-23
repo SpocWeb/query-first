@@ -5,8 +5,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace QueryFirst.IntegrationTests
 {
-
-
     public class TestDB : QueryFirstConnectionFactory
     {
         public override IDbConnection CreateConnection()
