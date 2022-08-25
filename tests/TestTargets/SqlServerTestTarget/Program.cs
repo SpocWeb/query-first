@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SqlServerTestTarget
 {
+    using FluentAssertions;
     using Queries;
     using QueryFirst;
     using QueryFirst.IntegrationTests;
@@ -30,6 +31,7 @@ namespace SqlServerTestTarget
             // Test Dynamic OrderBy
             var query = new TestDynamicOrderByQfRepo(testDB);
             var sorted = query.Execute(new[] { (TestDynamicOrderByQfRepo.Cols.MyVarchar, true) });
+
             Console.WriteLine(sorted[0].MyVarchar); // should be Xavier
 
             var asyncResult = new GetOneRowAsyncQfRepo(testDB).ExecuteScalarAsync().Result;
@@ -58,6 +60,9 @@ namespace SqlServerTestTarget
             Console.WriteLine($"ExpandableIn returns {expandableIn.Count} rows");
 
             var staticRslt = GetOneRowAsyncQfRepo.ExecuteStatic();
+
+            var dyn = DynamicInIntQfRepo.ExecuteStatic(new List<int?> { 1234,1235 });
+            dyn.Count.Should().Be(2);
         }
     }
     public static class QueryfirstDefaultConnection
