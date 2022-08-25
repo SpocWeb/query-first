@@ -56,6 +56,3 @@ We expect that QueryFirst will quickly become your favourite data access method.
 
 
 
-**[As seen on youtube !](http://geniusorfantasist.blogspot.fr/2017/02/the-tool-in-action.html)**
-
-[The documentation is on the project's github wiki.](https://github.com/bbsimonbb/query-first/wiki)
