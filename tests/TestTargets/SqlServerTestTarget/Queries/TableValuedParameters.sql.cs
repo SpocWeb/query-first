@@ -11,14 +11,15 @@ using System.Text.RegularExpressions;
 
 using static TableValuedParametersQfRepo;
 
+using FastMember; // Table valued params require the FastMember Nuget package
 
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 
 public interface ITableValuedParametersQfRepo{
 
-int ExecuteNonQuery();
-int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null);
+int ExecuteNonQuery(IEnumerable<TestTableType> myTableValuedParam);
+int ExecuteNonQuery(IEnumerable<TestTableType> myTableValuedParam, IDbConnection conn, IDbTransaction tx = null);
 }
 public partial class TableValuedParametersQfRepo : ITableValuedParametersQfRepo
 
@@ -43,20 +44,20 @@ return _inst;
 
 #region Sync
 
-public static int ExecuteNonQueryStatic()
-=> inst.ExecuteNonQuery();
-public virtual int ExecuteNonQuery()
+public static int ExecuteNonQueryStatic(IEnumerable<TestTableType> myTableValuedParam)
+=> inst.ExecuteNonQuery(myTableValuedParam);
+public virtual int ExecuteNonQuery(IEnumerable<TestTableType> myTableValuedParam)
 {
 using (IDbConnection conn = _connectionFactory.CreateConnection())
 {
 conn.Open();
-return ExecuteNonQuery(conn);
+return ExecuteNonQuery(myTableValuedParam, conn);
 }
 }
 
-public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
-=> inst.ExecuteNonQuery(conn, tx);
-public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
+public static int ExecuteNonQueryStatic(IEnumerable<TestTableType> myTableValuedParam, IDbConnection conn, IDbTransaction tx = null)
+=> inst.ExecuteNonQuery(myTableValuedParam, conn, tx);
+public virtual int ExecuteNonQuery(IEnumerable<TestTableType> myTableValuedParam, IDbConnection conn, IDbTransaction tx = null)
 {
 
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
@@ -66,8 +67,8 @@ using(IDbCommand cmd = conn.CreateCommand())
 {
 if(tx != null)
 cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
-AddParameters( cmd);
+cmd.CommandText = getCommandText(myTableValuedParam);
+AddParameters(myTableValuedParam,  cmd);
 var result = cmd.ExecuteNonQuery();
 
 // Assign output parameters to instance properties. 
@@ -82,158 +83,42 @@ return result;
 
 #endregion
 
-public string getCommandText(){
+public string getCommandText(IEnumerable<TestTableType> myTableValuedParam){
 var queryText = $@"/* .sql query managed by QueryFirst add-in */
+
 /*designTime - put parameter declarations and design time initialization here
+DECLARE @MyTableValuedParam TestTableType;
 endDesignTime*/
 
-CREATE TYPE TestTableType 
-   AS TABLE
-      ( MyTVPVarchar VARCHAR(255)
-      , MYTVPInt INT );";
+
+      INSERT into EveryDatatype (MyVarchar, MyInt) 
+      (SELECT TVP.MyTVPVarchar, TVP.MyTVPInt  FROM @MyTableValuedParam TVP)";
 // QfExpandoParams
 
 return queryText;
+}public class TestTableType{
+public System.String MyTVPVarchar{get; set;}
+public System.Int32? MYTVPInt{get; set;}
+
 }
-protected void AddParameters(IDbCommand cmd)
+
+protected void AddParameters(IEnumerable<TestTableType> myTableValuedParam, IDbCommand cmd)
 {
+
+{
+var myParam = (SqlParameter)cmd.CreateParameter();
+myParam.Direction = ParameterDirection.Input;
+myParam.ParameterName = "@MyTableValuedParam";
+myParam.SqlDbType = SqlDbType.Structured;
+myParam.TypeName = "TestTableType";
+DataTable table = new DataTable();
+using (var reader = ObjectReader.Create(myTableValuedParam, new string[]{"MyTVPVarchar","MYTVPInt"}))
+{
+    table.Load(reader);
+}
+myParam.Value = (object)table ?? DBNull.Value;
+
+cmd.Parameters.Add(myParam);
+}}
 }
 }
-}
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-La variable de table "@MyTableValuedParam" doit être déclarée.
------------------------------------------------------------
-   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
-   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
-   at System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
-   at System.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
-   at System.Data.SqlClient.SqlDataReader.get_MetaData()
-   at System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
-   at System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
-   at QueryFirst.AdoSchemaFetcher.GetQuerySchema(IDbConnection connection, IProvider prov, String strSQL) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 192
-   at QueryFirst.AdoSchemaFetcher.GetFields(IDbConnection connection, IProvider provObj, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 60
-   at QueryFirst.AdoSchemaFetcher.GetFields(String connectionString, String provider, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 25
-   at QueryFirst._7RunQueryAndGetResultSchema.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_7RunQueryAndGetResultSchema.cs:line 21
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 125
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-La variable de table "@MyTableValuedParam" doit être déclarée.
------------------------------------------------------------
-   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
-   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
-   at System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
-   at System.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
-   at System.Data.SqlClient.SqlDataReader.get_MetaData()
-   at System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
-   at System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
-   at QueryFirst.AdoSchemaFetcher.GetQuerySchema(IDbConnection connection, IProvider prov, String strSQL) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 192
-   at QueryFirst.AdoSchemaFetcher.GetFields(IDbConnection connection, IProvider provObj, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 60
-   at QueryFirst.AdoSchemaFetcher.GetFields(String connectionString, String provider, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 25
-   at QueryFirst._7RunQueryAndGetResultSchema.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_7RunQueryAndGetResultSchema.cs:line 21
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 125
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Colonne, paramètre ou variable #1 : type de données TestTableType introuvable.
-La variable de table "@MyTableValuedParam" doit être déclarée.
-Le paramètre ou la variable '@MyTableValuedParam' a un type de données non valide.
------------------------------------------------------------
-   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
-   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
-   at System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
-   at System.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
-   at System.Data.SqlClient.SqlDataReader.get_MetaData()
-   at System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
-   at System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
-   at System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)
-   at QueryFirst.AdoSchemaFetcher.GetQuerySchema(IDbConnection connection, IProvider prov, String strSQL) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 192
-   at QueryFirst.AdoSchemaFetcher.GetFields(IDbConnection connection, IProvider provObj, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 60
-   at QueryFirst.AdoSchemaFetcher.GetFields(String connectionString, String provider, String Query) in C:\Users\sboddy\source\repos\query-first\Shared\SchemaFetching\AdoSchemaFetcher.cs:line 25
-   at QueryFirst._7RunQueryAndGetResultSchema.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_7RunQueryAndGetResultSchema.cs:line 21
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 125
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 126
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 126
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.VSExtension.VsixConductor.ProcessOneQuery(Document queryDoc, Boolean headless) in C:\Users\sboddy\source\repos\query-first\QueryFirst.SharedVSExt\VsixConductor.cs:line 126
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.CommandLine.CommandLineConductor.ProcessOneQuery(String sourcePath, QfConfigModel outerConfig) in C:\Users\sboddy\source\repos\query-first\QueryFirst.CommandLine\CommandLineConductor.cs:line 92
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.CommandLine.CommandLineConductor.ProcessOneQuery(String sourcePath, QfConfigModel outerConfig) in C:\Users\sboddy\source\repos\query-first\QueryFirst.CommandLine\CommandLineConductor.cs:line 92
-*/
-Error running query.
-
-/*The last attempt to run this query failed with the following error. This class is no longer synced with the query
-You can compile the class by deleting this error information, but it will likely generate runtime errors.
------------------------------------------------------------
-Unable to find a type for TestTableType
------------------------------------------------------------
-   at QueryFirst.Providers.SqlClient.ParseDeclaredParameters(String queryText, String connectionString) in C:\Users\sboddy\source\repos\query-first\Shared\Providers\SqlClient.cs:line 39
-   at QueryFirst._8ParseOrFindDeclaredParams.Go(State& state) in C:\Users\sboddy\source\repos\query-first\Shared\StateAndTransitions\_8ParseOrFindDeclaredParams.cs:line 26
-   at QueryFirst.CommandLine.CommandLineConductor.ProcessOneQuery(String sourcePath, QfConfigModel outerConfig) in C:\Users\sboddy\source\repos\query-first\QueryFirst.CommandLine\CommandLineConductor.cs:line 92
-*/

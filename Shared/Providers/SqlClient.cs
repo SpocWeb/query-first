@@ -15,7 +15,7 @@ namespace QueryFirst.Providers
     {
         public virtual IDbConnection GetConnection(string connectionString)
         {
-            return new SqlConnection(connectionString);
+            return new System.Data.SqlClient.SqlConnection(connectionString);
         }
         public virtual List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString)
         {
@@ -32,7 +32,7 @@ namespace QueryFirst.Providers
                 {
                     try
                     {
-                        qp = GetParamInfoSecondAttempt(textParams[i].SqlTypeAndLength, connectionString);
+                        qp = GetParamInfoSecondAttempt(textParams[i].SqlTypeAndLength, textParams[i].SqlName, connectionString);
                     }
                     catch (Exception ex)
                     {
@@ -133,24 +133,29 @@ namespace QueryFirst.Providers
         /// <param name="queryText"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        private QueryParamInfo GetParamInfoSecondAttempt(string paramName, string connectionString)
+        private QueryParamInfo GetParamInfoSecondAttempt(string paramType, string paramName, string connectionString)
         {
-            // ToDo. I'm mixing Smo calls with string manip. This will not do.
             // Table Valued Parameters...
-            SqlConnection conn = new SqlConnection(connectionString);
-            Server s = new Server(new ServerConnection());
-            var myDb = s.Databases.Cast<Database>().Where(db => db.ActiveConnections > 0).FirstOrDefault();
-            var type = myDb.UserDefinedTableTypes.Cast<UserDefinedTableType>().Where(t => t.Name == paramName);
+#if VS16
+            var conn = new SqlConnection(connectionString);
+#else
+            var conn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+#endif
+            Server s = new Server(new ServerConnection(conn, null));
+            var myDb = s.Databases.Cast<Database>().Where(db => db.Name == conn.Database).FirstOrDefault();
+            var type = myDb.UserDefinedTableTypes.Cast<UserDefinedTableType>().Where(t => t.Name == paramType);
 
             if (type.Count() > 0)
             {
                 var returnVal = new QueryParamInfo
                 {
                     CSNameCamel = paramName.First().ToString().ToLower() + paramName.Substring(1),
-                    DbName = '@' + paramName,
-                    DbType = type.First().Urn.Type,
-                    CSType = $"IEnumerable<{paramName.First().ToString().ToUpper() + paramName.Substring(1)}>",
-                    InnerCSType = paramName.First().ToString().ToUpper() + paramName.Substring(1),
+                    CSNamePascal = paramName.First().ToString().ToUpper() + paramName.Substring(1),
+                    DbName = "@" + paramName,
+                    //DbType = type.First().Urn.Type,
+                    DbType = paramType,
+                    CSType = $"IEnumerable<{paramType.First().ToString().ToUpper() + paramType.Substring(1)}>",
+                    InnerCSType = paramType.First().ToString().ToUpper() + paramType.Substring(1),
                     IsTableType = true,
                     ParamSchema = new List<QueryParamInfo>()
                 };
@@ -161,7 +166,8 @@ namespace QueryFirst.Providers
 
                     returnVal.ParamSchema.Add(new QueryParamInfo
                     {
-                        CSNameCamel = col.Name,
+                        CSNameCamel = char.ToLower(col.Name.First()) + col.Name.Substring(1),
+                        CSNamePascal = char.ToUpper(col.Name.First()) + col.Name.Substring(1),
                         DbType = normalizedType,
                         CSType = csType,
                         DbName = '@' + col.Name
@@ -172,7 +178,7 @@ namespace QueryFirst.Providers
             }
             else
             {
-                throw new TypeNotMatchedException("No user defined type to match " + paramName);
+                throw new TypeNotMatchedException("No user defined type to match " + paramType);
             }
         }
         public virtual List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString, out string outputMessage)

@@ -12,8 +12,9 @@ using System.Text.RegularExpressions;
 using static ExpandableInQfRepo;
 
 
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
+using FastMember; // table valued params require FastMember
 
 public interface IExpandableInQfRepo{
 

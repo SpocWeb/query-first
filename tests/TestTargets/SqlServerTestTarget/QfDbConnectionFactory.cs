@@ -1,5 +1,5 @@
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace QueryFirst.IntegrationTests
 {
@@ -8,7 +8,7 @@ namespace QueryFirst.IntegrationTests
         public override IDbConnection CreateConnection()
         {
             //return new SqlConnection( _config.GetConnectionString("QueryFirstTestDB"));
-            return new SqlConnection("Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;");
+            return new SqlConnection("Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;Encrypt=false;");
         }
     }
 }

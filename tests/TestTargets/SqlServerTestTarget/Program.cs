@@ -55,14 +55,21 @@ namespace SqlServerTestTarget
                 myNchar: "loadsa κόσμε",
                 myNvarchar: "async result κόσμε"
             );
-             Console.WriteLine(carefullySelectedResult);
+            Console.WriteLine(carefullySelectedResult);
             var expandableIn = new ExpandableInQfRepo(testDB).Execute(new List<int?> { 1234, 1235 });
             Console.WriteLine($"ExpandableIn returns {expandableIn.Count} rows");
 
             var staticRslt = GetOneRowAsyncQfRepo.ExecuteStatic();
 
-            var dyn = DynamicInIntQfRepo.ExecuteStatic(new List<int?> { 1234,1235 });
+            var dyn = DynamicInIntQfRepo.ExecuteStatic(new List<int?> { 1234, 1235 });
             dyn.Count.Should().Be(2);
+
+            TableValuedParametersQfRepo.ExecuteNonQueryStatic(
+                new List<TableValuedParametersQfRepo.TestTableType> {
+                    new TableValuedParametersQfRepo.TestTableType {MyTVPVarchar = "cobber", MYTVPInt = 1236},
+                    new TableValuedParametersQfRepo.TestTableType {MyTVPVarchar = "cobber", MYTVPInt = 1237}
+                }
+            );
         }
     }
     public static class QueryfirstDefaultConnection

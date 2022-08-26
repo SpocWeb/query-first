@@ -10,7 +10,7 @@ can install directly inside Visual Studio (Extensions => Manage Extensions, then
 
 To Use QueryFirst in a project you will need to create a qfconfig.json file and implement the QueryFirstConnectionFactory abstract class.
 
-### qfconfig.json, at the root of your project
+## qfconfig.json, at the root of your project
 This is where you tell QueryFirst what database to use for test-running your query and generating the C# wrapper.
 
 ```json
@@ -19,7 +19,7 @@ This is where you tell QueryFirst what database to use for test-running your que
 } 
 ```
 
-### QueryFirstConnectionFactory
+## QueryFirstConnectionFactory
 QueryFirst repositories will use this class to get their runtime database connections. You can copy this class into your project, or you can import it via the QueryFirst.Runtime nuget. You then need to subclass it and implement the `CreateConnection()` method. If you instantiate your QfRepos, supply your subclassed QueryFirstConnectionFactory to the constructor, or register it as a service and let DI take care of it. If you plan to use the static methods on your repositories, you need to assign the Instance property.
 
 ```csharp
@@ -50,7 +50,7 @@ namespace MySuperProject
 QueryFirst.QueryFirstConnectionFactory.Instance = new MyDB();
 ```
 
-### Create a query
+## Create a query
 QueryFirst queries live in .sql files, created with the QueryFirst template that you should now see under Add => New items => Visual C#.
 
 Once in the template, your query goes after the `-- endDesignTime` flag.

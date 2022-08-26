@@ -96,7 +96,6 @@ namespace QueryFirst.Providers
             code.AppendLine("Cmd.Parameters.Add(myParam);");
             code.AppendLine("}");
             return code.ToString();
-
         }
 
         private Dictionary<string, string> DBType2CSType = new Dictionary<string, string>

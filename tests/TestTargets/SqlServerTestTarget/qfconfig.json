@@ -1,6 +1,6 @@
 {
-  "defaultConnection": "Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;",
-  "provider": "System.Data.SqlClient",
+  "defaultConnection": "Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;Encrypt=false;",
+  "provider": "Microsoft.Data.SqlClient",
   "connectEditor2DB": true
 }
             

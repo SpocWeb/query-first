@@ -24,8 +24,6 @@ namespace QueryFirst
         public State Go(ref State state)
         {
             var queryParams = _provider.ParseDeclaredParameters(state._6QueryWithParamsAdded, state._3Config.DefaultConnection);
-            if (queryParams.Where(param => param.DbType == "UserDefinedTableType").Count() != 0)
-                state._8HasTableValuedParams = true;
             var fullSig = new StringBuilder();
             var inputOnlySig = new StringBuilder();
             var callSig = new StringBuilder();
@@ -54,7 +52,7 @@ namespace QueryFirst
                     modifier = "";
                     // QfExpandoParams only possible for regular input only params
                     var expandoPattern = $@"\sin\s*\(\s*\{qp.DbName}\s*\)";
-                    if (Regex.IsMatch(queryWoDesignTime, expandoPattern, RegexOptions.IgnoreCase))
+                    if (!qp.IsTableType && Regex.IsMatch(queryWoDesignTime, expandoPattern, RegexOptions.IgnoreCase))
                     {
                         qp.IsQfExpandoParam = true;
                         fullSig.Append($@"List<{qp.CSType}> {qp.CSNameCamel},");
@@ -67,6 +65,8 @@ namespace QueryFirst
                     }
 
                 }
+                if (qp.IsTableType)
+                    state._8HasTableValuedParams = true;
 
 
             }

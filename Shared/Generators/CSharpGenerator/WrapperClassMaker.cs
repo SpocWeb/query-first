@@ -170,7 +170,7 @@ return returnVal;
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
             //ExecuteScalar without connection
-            code.AppendLine( $@"
+            code.AppendLine($@"
 public static {state._7ExecuteScalarReturnType} ExecuteScalarStatic({state._8MethodSignature.Trim(spaceComma)})
 => inst.ExecuteScalar({state._8CallingArgs.Trim(spaceComma)});
 public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature.Trim(spaceComma)})
@@ -193,7 +193,7 @@ return returnVal;
         public virtual string MakeExecuteScalarWithConn(State state)
         {
             StringBuilder code = new StringBuilder();
-            code.AppendLine( $@"
+            code.AppendLine($@"
 public static {state._7ExecuteScalarReturnType} ExecuteScalarStatic({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
 => inst.ExecuteScalar({state._8CallingArgs}conn, tx);
 public virtual {state._7ExecuteScalarReturnType} ExecuteScalar({state._8MethodSignature}IDbConnection conn, IDbTransaction tx = null)
@@ -364,7 +364,7 @@ return queryText;
         {
             return
 $@"public class {param.InnerCSType}{{
-{string.Join(",", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNameCamel}{{get; set;}}{n}"))}
+{string.Join("", param.ParamSchema.Select(col => $"public {col.CSType} {col.CSNamePascal}{{get; set;}}{n}"))}
 }}
 ";
 
@@ -378,18 +378,39 @@ protected void AddParameters({state._8MethodSignature}IDbCommand cmd)
 );
             foreach (var qp in state._8QueryParams.Where(qp => !qp.IsQfExpandoParam))
             {
-                // Direction
-                string direction;
-                if (qp.IsInput && qp.IsOutput)
-                    direction = "ParameterDirection.InputOutput";
-                else if (qp.IsOutput)
-                    direction = "ParameterDirection.Output";
+                if (qp.IsTableType)
+                {
+                    code.Append($@"
+{{
+var myParam = (SqlParameter)cmd.CreateParameter();
+myParam.Direction = ParameterDirection.Input;
+myParam.ParameterName = ""{qp.DbName}"";
+myParam.SqlDbType = SqlDbType.Structured;
+myParam.TypeName = ""{qp.DbType}"";
+DataTable table = new DataTable();
+using (var reader = ObjectReader.Create({qp.CSNameCamel}, new string[]{{""{string.Join("\",\"", qp.ParamSchema.Select(col => col.CSNamePascal ))}""}}))
+{{
+    table.Load(reader);
+}}
+myParam.Value = (object)table ?? DBNull.Value;
+
+cmd.Parameters.Add(myParam);
+}}");
+                }
                 else
-                    direction = "ParameterDirection.Input";
+                {
+                    // Direction
+                    string direction;
+                    if (qp.IsInput && qp.IsOutput)
+                        direction = "ParameterDirection.InputOutput";
+                    else if (qp.IsOutput)
+                        direction = "ParameterDirection.Output";
+                    else
+                        direction = "ParameterDirection.Input";
 
 
-                //code.AppendLine("AddAParameter(cmd, \"" + qp.DbType + "\", \"" + qp.DbName + "\", " + qp.CSName + ", " + qp.Length + ", " + qp.Scale + ", " + qp.Precision + ");");
-                code.Append($@"
+                    //code.AppendLine("AddAParameter(cmd, \"" + qp.DbType + "\", \"" + qp.DbName + "\", " + qp.CSName + ", " + qp.Length + ", " + qp.Scale + ", " + qp.Precision + ");");
+                    code.Append($@"
 {{
 var myParam = cmd.CreateParameter();
 myParam.Direction = {direction};
@@ -398,10 +419,12 @@ myParam.DbType = (DbType)Enum.Parse(typeof(DbType), ""{qp.DbType}"");
 {(qp.IsInput ? $"myParam.Value = (object){qp.CSNameCamel} ?? DBNull.Value;" : "") + n}
 cmd.Parameters.Add(myParam);
 }}"
-                );
+                    );
 
+                }
             }
-            code.AppendLine("}");
+                code.AppendLine("}");
+
             return code.ToString();
         }
         public virtual string CloseClass(State state)

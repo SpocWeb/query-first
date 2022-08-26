@@ -54,7 +54,6 @@ namespace QueryFirst.Generators
             }
 
             Code.Append(_wrapper.MakeGetCommandTextMethod(state));
-            //Code.Append(_provider.MakeAddAParameter(state));
             Code.Append(_wrapper.MakeTvpPocos(state));
 
             if (state._3Config.MakeSelfTest.GetValueOrDefault())
@@ -89,6 +88,7 @@ namespace QueryFirst.Generators
                 }
                 Code.Append(_wrapper.MakeCreateMethod(state));
             }
+
             Code.Append(_wrapper.MakeOtherMethods(state));
             Code.Append(_wrapper.CloseClass(state));
 

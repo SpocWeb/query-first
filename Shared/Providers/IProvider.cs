@@ -42,6 +42,7 @@ namespace QueryFirst
         string TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true);
 
         /// <summary>
+        /// 2022 Not used. Are other DBs still supported? 
         /// Generates the C# method that adds a parameter to the command. Called once for each parameter in the query.
         /// The method should have the signature...
         /// private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length)
