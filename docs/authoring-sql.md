@@ -2,6 +2,9 @@
 
 In Visual Studio, .sql files will open in the marvelous TSQL editor window. If you're database is SQL Server, QueryFirst will automatically connect the editor window to the database (using your qfconfig defaultConnection). You should now see your tables and columns popping up in Intellisense suggestions.
 
+![image](images/authoring.png)
+<p align="center" style="font-size:smaller">The marvelous TSQL editor</p>
+
 ## Parameters
 
 To add a parameter, just start using it directly in your SQL. With SQL Server, there's nothing else to do. When you save, we detect the parameters used in the query and add them as local variables in the designTime section. When we then generate the C# wrapper, these local variables will be converted to strongly typed ADO parameters. In the generated execute methods, the parameter order will be taken from the designTime section, so you can reorder the lines if you want to.
@@ -94,4 +97,12 @@ public class CustomerType{
 }
 ```
 
-QueryFirst cannot automatically sniff the type of table-valued parameters, like it can with primitive types, so you will need to manually declare them as shown above.
+QueryFirst cannot automatically sniff table-valued parameters in your SQL, like it can with primitive types, so you will need to manually declare them as shown above. But once you do this, we can recover the type from the database and generate the matching POCO as shown in the example.
+
+You will notice that the generated code now has a line `using FastMember;` We use Marc Gravell's marvelous FastMember package to convert your IEnumerable of POCO's to a Dataset. You will need to add the package nuget to your project. For .net core projects, you will need to specify the Microsoft.Data.SqlClient provider, as follows...
+
+```json
+// qfconfig.json
+"defaultConnection": "Data Source=MyServer;Database=Northwind;Trusted_Connection=True;",
+"provider": "Microsoft.Data.SqlClient"
+```

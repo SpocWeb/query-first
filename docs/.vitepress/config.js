@@ -8,7 +8,8 @@ export default {
         items: [
           { text: 'Introduction', link: '/' },
           { text: 'Getting Started', link: '/getting-started' },
-          {text: 'Authoring SQL', link: '/authoring-sql'}
+          {text: 'Authoring SQL', link: '/authoring-sql'},
+          {text: 'The Generated Code', link:'/generated'}
         ]
       }
     ]
