@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirstQueryTemplate", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFirst.VS16", "QueryFirst_VS16\QueryFirst.VS16.csproj", "{481ADC64-EF55-4E22-8BDB-24F5C0865161}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "QueryFirst.SharedAll", "Shared\QueryFirst.SharedAll.shproj", "{F88A3934-065E-490C-A514-0B791E832170}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "QueryFirst.SharedAll", "QueryFirst.SharedAll\QueryFirst.SharedAll.shproj", "{F88A3934-065E-490C-A514-0B791E832170}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirst.CommandLine", "QueryFirst.CommandLine\QueryFirst.CommandLine.csproj", "{EB15DF6D-00F5-4ABE-A1ED-FB19F06CAC68}"
 EndProject
@@ -103,11 +103,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		QueryFirst.SharedVSExt\QueryFirst.SharedVSExt.projitems*{481adc64-ef55-4e22-8bdb-24f5c0865161}*SharedItemsImports = 4
-		Shared\Shared.projitems*{481adc64-ef55-4e22-8bdb-24f5c0865161}*SharedItemsImports = 4
+		QueryFirst.SharedAll\Shared.projitems*{481adc64-ef55-4e22-8bdb-24f5c0865161}*SharedItemsImports = 4
 		QueryFirst.SharedVSExt\QueryFirst.SharedVSExt.projitems*{7b88512e-3142-457d-b3b2-578aaf163999}*SharedItemsImports = 13
 		QueryFirst.SharedVSExt\QueryFirst.SharedVSExt.projitems*{b6a48b04-12db-43ce-8fad-b07bbb0198a6}*SharedItemsImports = 4
-		Shared\Shared.projitems*{b6a48b04-12db-43ce-8fad-b07bbb0198a6}*SharedItemsImports = 4
-		Shared\Shared.projitems*{eb15df6d-00f5-4abe-a1ed-fb19f06cac68}*SharedItemsImports = 5
-		Shared\Shared.projitems*{f88a3934-065e-490c-a514-0b791e832170}*SharedItemsImports = 13
+		QueryFirst.SharedAll\Shared.projitems*{b6a48b04-12db-43ce-8fad-b07bbb0198a6}*SharedItemsImports = 4
+		QueryFirst.SharedAll\Shared.projitems*{eb15df6d-00f5-4abe-a1ed-fb19f06cac68}*SharedItemsImports = 5
+		QueryFirst.SharedAll\Shared.projitems*{f88a3934-065e-490c-a514-0b791e832170}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
