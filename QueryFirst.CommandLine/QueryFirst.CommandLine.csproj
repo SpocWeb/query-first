@@ -37,7 +37,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <Import Project="..\Shared\Shared.projitems" Label="Shared" />
-
+  <Import Project="..\QueryFirst.SharedAll\QueryFirst.SharedAll.projitems" Label="Shared" />
 </Project>
