@@ -71,4 +71,7 @@
     <None Include="$(MSBuildThisFileDirectory)Key.snk" />
     <None Include="$(MSBuildThisFileDirectory)Providers\sp_describe_undeclared_parameters.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)qfconfig.schema.json" />
+  </ItemGroup>
 </Project>

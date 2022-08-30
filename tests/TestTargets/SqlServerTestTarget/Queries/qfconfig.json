@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../queryfirst.sharedall/qfconfig.schema.json#",
+  "defaultConnection": "yahoo ça marche",
+  "provider": "System.Data.SqlClient",
+  "connectEditor2DB": true,
+  "generators": [
+    {
+      "name": "CSharp",
+      "options": [
+        { "generateAsync": "true" },
+        { "unkownOption": ""}
+      ]
+    },
+    { "name": "TsInterfaceFromDto" },
+    {"name": "JustInvented"}
+  ]
+}

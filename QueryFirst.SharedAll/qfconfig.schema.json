@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "properties": {
+    "defaultConnection": {
+      "type": "string"
+    },
+    "provider": {
+      "enum": [
+        "Microsoft.Data.SqlClient",
+        "MySql.Data.MySqlClient",
+        "Npgsql",
+        "System.Data.SqlClient"
+      ]
+    },
+    "generators": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/generator" }
+    },
+    "connectEditor2DB": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "generator": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "CSharp",
+            "TsInterfaceFromDto"
+          ]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "additionalProperties": {
+              "oneOf": [{"type": "string"},{"type": "boolean"}]
+            }
+          }
+        }
+      }
+    }
+  }
+}
