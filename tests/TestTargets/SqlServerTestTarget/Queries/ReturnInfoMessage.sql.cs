@@ -14,7 +14,6 @@ using static ReturnInfoMessageQfRepo;
 
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
-using FastMember; // table valued params require FastMember
 
 public interface IReturnInfoMessageQfRepo{
 

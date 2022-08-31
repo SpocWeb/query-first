@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace QueryFirst.Providers
 {
     [RegistrationName("System.Data.SqlClient")]
-    internal class SqlClient : IProvider
+    public class SqlClient : IProvider
     {
         public virtual IDbConnection GetConnection(string connectionString)
         {

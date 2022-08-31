@@ -18,6 +18,12 @@
     },
     "connectEditor2DB": {
       "type": "boolean"
+    },
+    "helperAssemblies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "$defs": {
@@ -31,13 +37,13 @@
           ]
         },
         "options": {
-          "type": "array",
           "description": "Generators are loosely coupled. Options are passed as a string dictionary. Only strings here sorry.",
           "items": {
             "additionalProperties": {
               "type": "string"
             }
-          }
+          },
+          "type": "array"
         }
       }
     }

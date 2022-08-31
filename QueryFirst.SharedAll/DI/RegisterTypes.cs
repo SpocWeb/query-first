@@ -39,12 +39,15 @@ namespace QueryFirst
                         }
                     }
                 }
-                assemblies.Add(Assembly.GetExecutingAssembly());
-                // QueryFirst.CoreLib
-                assemblies.Add(Assembly.GetAssembly(typeof(AdoSchemaFetcher)));
+                //assemblies.Add(Assembly.GetExecutingAssembly());
+                // QueryFirst.CoreLib, with shared code, corelib is no longer an assembly
+                //assemblies.Add(Assembly.GetAssembly(typeof(AdoSchemaFetcher)));
                 var then = new DateTime();
                 // First in wins
                 TinyIoCContainer.Current.AutoRegister(assemblies, DuplicateImplementationActions.RegisterSingle);
+                var core = new List<Assembly>();
+                core.Add(Assembly.GetExecutingAssembly());
+                TinyIoCContainer.Current.AutoRegister(core, DuplicateImplementationActions.RegisterSingle);
                 var now = new DateTime();
                 QfConsole.WriteLine($@"{assemblies.Count} assemblies registered in {(now - then).TotalMilliseconds}ms");
                 // IProvider, for instance, has multiple implementations. To resolve we use the provider name on the connection string, 

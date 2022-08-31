@@ -1,8 +1,10 @@
 {
-	"generators": [
-		{
-			"name": "CSharp",
-			"options": { "generateAsync": true }
-		}
-	]
+  "$schema": "../../../../queryfirst.sharedall/jsonschema/qfconfig.schema.json#",
+  "provider": "MyGroovyProvider",
+  "generators": [
+    {
+      "name": "CSharp",
+      "options": { "generateAsync": "true" }
+    }
+  ]
 }

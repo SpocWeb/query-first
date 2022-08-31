@@ -1,6 +1,8 @@
 {
-  "$schema": "../../QueryFirst.SharedAll/JsonSchema/qfconfig.schema.json",
+  "$schema": "../../../queryfirst.sharedall/jsonschema/qfconfig.schema.json#",
   "defaultConnection": "Data Source=s-dev4,1434;Database=QueryFirstTestDB;Trusted_Connection=True;Encrypt=false;",
   "provider": "Microsoft.Data.SqlClient",
-  "connectEditor2DB": true
+  "connectEditor2DB": true,
+  "helperAssemblies": [ "C:\\Users\\sboddy\\source\\repos\\query-first\\tests\\TestTargets\\TestHelperDll\\bin\\Debug\\net6.0\\TestHelperDll.dll" ]
+
 }

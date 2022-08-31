@@ -9,7 +9,6 @@
     <Import_RootNamespace>Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Class1.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config\ConfigBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config\ConfigFileReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Config\IConfigBuilder.cs" />
@@ -72,6 +71,6 @@
     <None Include="$(MSBuildThisFileDirectory)Providers\sp_describe_undeclared_parameters.sql" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)qfconfig.schema.json" />
+    <Content Include="$(MSBuildThisFileDirectory)JsonSchema\qfconfig.schema.json" />
   </ItemGroup>
 </Project>
