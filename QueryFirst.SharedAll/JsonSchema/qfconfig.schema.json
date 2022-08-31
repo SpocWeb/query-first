@@ -32,11 +32,13 @@
         },
         "options": {
           "type": "array",
+          "description": "Generators are loosely coupled. Options are passed as a string dictionary. Only strings here sorry.",
           "items": {
-            "additionalProperties": { "type": "string" }
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
-
       }
     }
   }

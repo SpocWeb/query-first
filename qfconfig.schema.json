@@ -33,11 +33,10 @@
         "options": {
           "type": "array",
           "items": {
-            "additionalProperties": {
-              "oneOf": [{"type": "string"},{"type": "boolean"}]
-            }
+            "additionalProperties": { "type": "string" }
           }
         }
+
       }
     }
   }
