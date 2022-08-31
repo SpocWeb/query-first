@@ -29,6 +29,10 @@ namespace IntegrationTests
             result.stdOut.Should().Contain("GetOneRow.sql");
             result.stdErr.Should().BeEmpty();
 
+            // Dependency Injection. Groovy provider should be used for async
+            var asyncCodeFile = File.ReadAllText(Path.Combine(assemblyPath, @"../../../../TestTargets/SqlServerTestTarget/Queries/GetOneRowAsync.sql.cs"));
+            asyncCodeFile.Should().Contain("hello from MyGroovyProvider");
+
             // Build it
             var buildResult = RunProcess("dotnet", $"build {projectToRegenerate} -c Debug");
             buildResult.stdErr.Should().BeEmpty();

@@ -33,8 +33,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Generators\IGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generators\InstantiateAndCallGenerators.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generators\TypescriptInterfaceFromDto.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IQfDbConnectionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\IProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IQfDbConnectionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\MicrosoftDataSqlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\MySqlClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\Npgsql.cs" />

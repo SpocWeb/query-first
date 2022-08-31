@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestTargets", "TestTargets"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlServerTestTarget", "Tests\TestTargets\SqlServerTestTarget\SqlServerTestTarget.csproj", "{BBD6B2AE-C1EA-44AA-959A-BAA9A332CAF1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirst.Runtime", "QueryFirst.Runtime\QueryFirst.Runtime.csproj", "{A38EBE60-1639-4AF8-9941-8FD5A6F55826}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryFirst.CoreLib", "QueryFirst.CoreLib\QueryFirst.CoreLib.csproj", "{A38EBE60-1639-4AF8-9941-8FD5A6F55826}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestHelperDll", "tests\TestTargets\TestHelperDll\TestHelperDll.csproj", "{7FBD112B-E383-406A-BB8A-17AB42B56CA7}"
 EndProject

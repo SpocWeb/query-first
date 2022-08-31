@@ -27,7 +27,7 @@
     <ProjectCapability Include="DynamicFileNesting" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\QueryFirst.Runtime\QueryFirst.Runtime.csproj" />
+    <ProjectReference Include="..\..\..\QueryFirst.CoreLib\QueryFirst.CoreLib.csproj" />
   </ItemGroup>
   <Import Project="..\..\..\QueryFirst.SharedAll\QueryFirst.SharedAll.projitems" Label="Shared" />
 

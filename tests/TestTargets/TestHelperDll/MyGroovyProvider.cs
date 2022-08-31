@@ -4,12 +4,11 @@ using System.Data;
 namespace TestHelperDll
 {
     [RegistrationName("MyGroovyProvider")]
-    public class TestProvider : QueryFirst.Providers.SqlClient
+    public class TestProvider : QueryFirst.Providers.MicrosoftDataSqlClient
     {
-        public string GetProviderSpecificUsings()
-            => @"// hello from MyGroovyProvider
-using System.Data.SqlClient;
-using System.Threading.Tasks;
-";
+        public override string HookUpForExecutionMessages()
+        {
+            return base.HookUpForExecutionMessages() + "// hello from MyGroovyProvider";
+        }
     }
 }

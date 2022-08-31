@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\QueryFirst.Runtime\QueryFirst.Runtime.csproj" />
+    <ProjectReference Include="..\..\QueryFirst.CoreLib\QueryFirst.CoreLib.csproj" />
   </ItemGroup>
 
 </Project>
