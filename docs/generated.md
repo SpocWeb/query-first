@@ -34,8 +34,8 @@ By default, async methods are not generated. You can change this by putting the 
 ```json
  "generators": [
     {
-        "Name": "CSharp",
-        "Options": { "generateAsync": true }
+        "name": "CSharp",
+        "options": { "generateAsync": true }
     }
  ]
 ```

@@ -24,6 +24,10 @@
       "items": {
         "type": "string"
       }
+    },
+    "makeSelfTest": {
+      "type": "boolean",
+      "description": "Should QueryFirst add a selfTest method to the generated code? You will need add xunit and QueryFirst.CoreLib nugets to your project."
     }
   },
   "$defs": {

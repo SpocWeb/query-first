@@ -9,7 +9,9 @@ export default {
           { text: 'Introduction', link: '/' },
           { text: 'Getting Started', link: '/getting-started' },
           {text: 'Authoring SQL', link: '/authoring-sql'},
-          {text: 'The Generated Code', link:'/generated'}
+          {text: 'The Generated Code', link:'/generated'},
+          {text: 'Extending QueryFirst', link:'/extending'},
+          {text: 'The SelfTest() Method', link:'/selftest'}
         ]
       }
     ]

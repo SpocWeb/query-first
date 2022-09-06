@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace QueryFirst.Generators
 {
@@ -510,18 +511,20 @@ Task<int> ExecuteNonQueryAsync(" + state._8MethodSignature + @"IDbConnection con
         {
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
-
-            code.AppendLine("[Fact]");
-            code.AppendLine("public void " + QfRepoClassName(state._1BaseName) + "SelfTest()");
-            code.AppendLine("{");
-            code.AppendLine($"var queryText = getCommandText({state._8CallingArgs.Trim(spaceComma)});");
-            code.AppendLine("// we'll be getting a runtime version with the comments section closed. To run without parameters, open it.");
-            code.AppendLine("queryText = queryText.Replace(\"/*designTime\", \"-- designTime\");");
-            code.AppendLine("queryText = queryText.Replace(\"endDesignTime*/\", \"-- endDesignTime\");");
-            // QfruntimeConnection will be used, but we still need to reference a provider, for the prepare parameters method.
-            code.AppendLine($"var schema = new AdoSchemaFetcher().GetFields(_connectionFactory.CreateConnection(), \"{state._3Config.Provider}\", queryText);");
-            code.Append("Assert.True(" + state._7ResultFields.Count + " <=  schema.Count,");
-            code.AppendLine("\"Query only returns \" + schema.Count.ToString() + \" columns. Expected at least " + state._7ResultFields.Count + ". \");");
+            var nullCallingArgs = Regex.Replace(state._8CallingArgs, @"[\w|_|@]+", "null").Trim(spaceComma);
+            code.Append($@"
+[Fact]
+public void {QfRepoClassName(state._1BaseName)}SelfTest()
+{{
+var queryText = getCommandText({nullCallingArgs});
+// we'll be getting a runtime version with the comments section closed. To run without parameters, open it.
+queryText = queryText.Replace(""/*designTime"", ""-- designTime"");
+queryText = queryText.Replace(""endDesignTime*/"", ""-- endDesignTime"");
+// QueryFirstConnectionFactory will be used, but we still need to reference a provider, for the prepare parameters method.
+var schema = new AdoSchemaFetcher().GetFields(_connectionFactory.CreateConnection(), ""{state._3Config.Provider}"", queryText);
+Assert.True({state._7ResultFields.Count} <=  schema.Count,
+""Query only returns "" + schema.Count.ToString() + "" columns. Expected at least {state._7ResultFields.Count}."");
+");
             for (int i = 0; i < state._7ResultFields.Count; i++)
             {
                 var col = state._7ResultFields[i];

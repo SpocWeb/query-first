@@ -56,3 +56,5 @@ QueryFirst queries live in .sql files, created with the QueryFirst template that
 Once in the template, your query goes after the `-- endDesignTime` flag.
 
 ![QueryFirst template](https://user-images.githubusercontent.com/11962703/75419461-f7bd6e80-5989-11ea-93c9-583105e261d3.png)
+
+If this is too slow for you, and you're in a .net core project (.net 5 or greater), you can just create a .sql file and put the text "queryfirst" (case insensitive) somewhere on the first line. Use the [Add New File](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.AddNewFile) extension until its functionality [finally shows up in visual studio](https://twitter.com/mkristensen/status/1561823791553998848).

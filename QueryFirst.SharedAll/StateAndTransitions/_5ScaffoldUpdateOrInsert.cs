@@ -36,10 +36,10 @@ namespace QueryFirst
 
 -- endDesignTime
 INSERT INTO " + targetTable + @" (
-" + string.Join(",\r\n", cols.Select(col => col.ColumnName)) + @"
+" + string.Join(",\r\n", cols.Where(c=>!c.IsReadOnly).Select(col => col.ColumnName)) + @"
 )
 VALUES (
-" + string.Join(",\r\n", cols.Select(col => "@" + col.ColumnName)) + @"
+" + string.Join(",\r\n", cols.Where(c => !c.IsReadOnly).Select(col => "@" + col.ColumnName)) + @"
 )
 
 SELECT CAST(SCOPE_IDENTITY() AS INT) AS JustInsertedId";
@@ -56,7 +56,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT) AS JustInsertedId";
 -- endDesignTime
 UPDATE " + targetTable + @"
 SET 
-" + string.Join(",\r\n", cols.Select(col => col.ColumnName + " = @" + col.ColumnName));
+" + string.Join(",\r\n", cols.Where(c => !c.IsReadOnly).Select(col => col.ColumnName + " = @" + col.ColumnName));
                 }
             }
             else state._5QueryAfterScaffolding = state._2InitialQueryText;

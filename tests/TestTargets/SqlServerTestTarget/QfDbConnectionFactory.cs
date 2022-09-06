@@ -5,6 +5,10 @@ namespace QueryFirst.IntegrationTests
 {
     public class TestDB : QueryFirstConnectionFactory
     {
+        public TestDB()
+        {
+            QueryFirstConnectionFactory.Instance = this;
+        }
         public override IDbConnection CreateConnection()
         {
             //return new SqlConnection( _config.GetConnectionString("QueryFirstTestDB"));

@@ -3452,6 +3452,7 @@ namespace QueryFirst
                 foreach (var type in abstractInterfaceTypes)
                 {
                     var localType = type;
+                    var typeName = localType.Name;
                     var implementations = from implementationType in concreteTypes
                                           where localType.IsAssignableFrom(implementationType)
                                           select implementationType;

@@ -1,10 +1,11 @@
-﻿using QueryFirst;
-using System.Data;
+﻿// You will need a COM reference to QueryFirst.dll
+using QueryFirst;
+using QueryFirst.Providers;
 
 namespace TestHelperDll
 {
     [RegistrationName("MyGroovyProvider")]
-    public class TestProvider : QueryFirst.Providers.MicrosoftDataSqlClient
+    public class TestProvider : MicrosoftDataSqlClient
     {
         public override string HookUpForExecutionMessages()
         {
