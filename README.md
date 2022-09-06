@@ -32,4 +32,4 @@ namespace CoreWebAppSqlServer
 
 Nikhil Gupta, this is Simon Boddy, bbsimonbb@gmail.com, proving ownership of this repo !
 
-Read more and download the VSIX [here](https://visualstudiogallery.msdn.microsoft.com/eaf390af-afc1-4994-a442-ec95923dafcb). There's a little code project article [here](www.codeproject.com/Tips/1108776/QueryFirst-Worlds-First-Implementation-of-the-Domi).
+Read more and download the VSIX [here](https://visualstudiogallery.msdn.microsoft.com/eaf390af-afc1-4994-a442-ec95923dafcb). There's a little code project article [here](https://www.codeproject.com/Tips/1108776/Your-SQL-Wrapped-in-Generated-Code-Interesting-Ori).
