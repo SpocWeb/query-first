@@ -429,11 +429,11 @@ namespace QueryFirst.Providers
                         returnVal.Add(new ResultFieldDetails
                         {
                             ColumnName = colName,
-                            AllowDBNull = rec.Field<bool>("is_nullable"),
+                            AllowDBNull = rec.Field<bool?>("is_nullable").GetValueOrDefault(),
                             BaseColumnName = rec.Field<string>("name"),
                             ColumnOrdinal = rec.Field<int>("column_ordinal"),
                             CSColumnName = csColName,
-                            IsIdentity = rec.Field<bool>("is_identity_column"),
+                            IsIdentity = rec.Field<bool?>("is_identity_column").GetValueOrDefault(),
                             NumericPrecision = qp.Precision,
                             NumericScale = qp.Scale,
                             TypeCs = qp.FullyQualifiedCSType,
