@@ -25,6 +25,16 @@ namespace QueryFirst
         /// otherwise the filename of the .csproj.
         /// </summary>
         public string ProjectNamespace { get; set; }
+        /// <summary>
+        /// Suffix appended to the base query name to get the C# repository name.
+        /// Default "QfRepo" in install config
+        /// </summary>
+        public string RepoSuffix { get; set; }
+        /// <summary>
+        /// Suffix appended to the base query name to get the C# DTO name.
+        /// Default "QfDto" in install config
+        /// </summary>
+        public string DtoSuffix { get; set; }
 
     }
 }

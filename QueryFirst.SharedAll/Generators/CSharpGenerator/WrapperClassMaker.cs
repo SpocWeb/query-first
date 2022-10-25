@@ -10,7 +10,6 @@ namespace QueryFirst.Generators
     public partial class WrapperClassMaker
     {
         static readonly string n = Environment.NewLine;
-        protected string QfRepoClassName(string baseName) => $"{baseName}QfRepo";
         public virtual string Usings(State state)
         {
             return $@"using System;
@@ -22,7 +21,7 @@ using System.Configuration;
 using System.Linq;
 using QueryFirst;
 using System.Text.RegularExpressions;
-{n}using static {QfRepoClassName(state._1BaseName)};
+{n}using static {state._4RepoClassName};
 {(state._8HasTableValuedParams ? $@"{n}using FastMember; // Table valued params require the FastMember Nuget package{n}" : n)}
 {state._6ProviderSpecificUsings}
 ";
@@ -38,22 +37,22 @@ using System.Text.RegularExpressions;
         public virtual string StartClass(State state)
         {
             return
-$@"public partial class {QfRepoClassName(state._1BaseName)} : I{QfRepoClassName(state._1BaseName)}{Environment.NewLine}
+$@"public partial class {state._4RepoClassName} : I{state._4RepoClassName}{Environment.NewLine}
 {{
 
 void AppendExececutionMessage(string msg) {{ ExecutionMessages += msg + Environment.NewLine; }}
 public string ExecutionMessages {{ get; protected set; }}
 // constructor with connection factory injection
 protected QueryFirst.QueryFirstConnectionFactory _connectionFactory;
-public  {QfRepoClassName(state._1BaseName)}(QueryFirst.QueryFirstConnectionFactory connectionFactory)
+public  {state._4RepoClassName}(QueryFirst.QueryFirstConnectionFactory connectionFactory)
 {{
     _connectionFactory = connectionFactory;
 }}
-private static I{QfRepoClassName(state._1BaseName)} _inst;
-private static I{QfRepoClassName(state._1BaseName)} inst {{ get
+private static I{state._4RepoClassName} _inst;
+private static I{state._4RepoClassName} inst {{ get
 {{
 if (_inst == null)
-_inst = new {QfRepoClassName(state._1BaseName)}(QueryFirstConnectionFactory.Instance);
+_inst = new {state._4RepoClassName}(QueryFirstConnectionFactory.Instance);
 return _inst;
 }}
 }}
@@ -444,7 +443,7 @@ cmd.Parameters.Add(myParam);
         {
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
-            code.AppendLine("public interface I" + QfRepoClassName(state._1BaseName) + "{" + Environment.NewLine);
+            code.AppendLine("public interface I" + state._4RepoClassName + "{" + Environment.NewLine);
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
             {
                 code.AppendLine(
@@ -514,7 +513,7 @@ Task<int> ExecuteNonQueryAsync(" + state._8MethodSignature + @"IDbConnection con
             var nullCallingArgs = Regex.Replace(state._8CallingArgs, @"[\w|_|@]+", "null").Trim(spaceComma);
             code.Append($@"
 [Fact]
-public void {QfRepoClassName(state._1BaseName)}SelfTest()
+public void {state._4RepoClassName}SelfTest()
 {{
 var queryText = getCommandText({nullCallingArgs});
 // we'll be getting a runtime version with the comments section closed. To run without parameters, open it.

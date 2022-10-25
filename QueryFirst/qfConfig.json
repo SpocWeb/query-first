@@ -4,7 +4,9 @@
     "qfConfig": {
       "generators": [
         { "name": "CSharp" }
-      ]
+      ],
+      "DtoSuffix":"QfDto",
+      "RepoSuffix":"QfRepo"
     }
   }
 ]

@@ -420,7 +420,7 @@ cmd.Parameters.Add(myParam);
 }}
 }
 public partial class LoadsaParametersQfDto  {
-protected string _MyNchar; // nchar(255) null
+protected string _MyNchar; // nchar(50) null
 public string MyNchar{
 get{return _MyNchar;}
 set{_MyNchar = value;}

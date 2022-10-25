@@ -30,6 +30,7 @@ namespace QueryFirst
         /// The directory containing the 3 files for this query, with trailing slash
         /// </summary>
         public string _1CurrDir { get; set; }
+        public string _4RepoClassName { get; set; }
         public string _4ResultClassName { get; set; }
         public string _4ResultInterfaceName { get; set; }
         public string _4Namespace { get; set; }

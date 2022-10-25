@@ -398,7 +398,7 @@ public string MyText{
 get{return _MyText;}
 set{_MyText = value;}
 }
-protected string _MyNchar; // nchar(255) null
+protected string _MyNchar; // nchar(50) null
 public string MyNchar{
 get{return _MyNchar;}
 set{_MyNchar = value;}

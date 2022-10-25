@@ -28,6 +28,14 @@
     "makeSelfTest": {
       "type": "boolean",
       "description": "Should QueryFirst add a selfTest method to the generated code? You will need add xunit and QueryFirst.CoreLib nugets to your project."
+    },
+    "repoSuffix": {
+      "type": "string",
+      "description": "Suffix to append to the query base name to get the generated repository class name"
+    },
+    "dtoSuffix": {
+      "type": "string",
+      "description": "Suffix to append to the query base name to get the result class name"
     }
   },
   "$defs": {

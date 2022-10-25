@@ -26,7 +26,8 @@ namespace QueryFirst
                         .Trim('.')
                 ).Trim('.');
             }
-            state._4ResultClassName = state._4ResultClassName ?? state._1BaseName + "QfDto";
+            state._4ResultClassName = state._1BaseName + state._3Config.DtoSuffix;
+            state._4RepoClassName = state._1BaseName + state._3Config.RepoSuffix;
             state._4ResultInterfaceName = state._3Config.ResultInterfaceName ?? state._4ResultClassName;
             return state;
         }

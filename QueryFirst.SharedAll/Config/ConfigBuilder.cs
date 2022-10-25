@@ -33,7 +33,9 @@ namespace QueryFirst
                 ResultClassName = overides.ResultClassName ?? overridden.ResultClassName,
                 ResultInterfaceName = overides.ResultInterfaceName ?? overridden.ResultInterfaceName,
                 ProjectRoot = overides.ProjectRoot ?? overridden.ProjectRoot,
-                ProjectNamespace = overides.ProjectNamespace ?? overridden.ProjectNamespace
+                ProjectNamespace = overides.ProjectNamespace ?? overridden.ProjectNamespace,
+                RepoSuffix = overides.RepoSuffix ?? overridden.RepoSuffix,
+                DtoSuffix = overides.DtoSuffix ?? overridden.DtoSuffix
             };
             Console.WriteLine(returnVal.ProjectRoot);
             // helper assemblies. Unlike other config, these cumulate.
