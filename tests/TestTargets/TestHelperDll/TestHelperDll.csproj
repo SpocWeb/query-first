@@ -13,9 +13,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="QueryFirst">
-      <HintPath>..\..\..\QueryFirst.CommandLine\bin\Debug\net6.0\QueryFirst.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\..\QueryFirst.CommandLine\QueryFirst.CommandLine.csproj" />
   </ItemGroup>
 
 </Project>
