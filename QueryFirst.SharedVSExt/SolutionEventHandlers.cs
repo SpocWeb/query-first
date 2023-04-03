@@ -197,7 +197,15 @@ $@"If you're using and enjoying QueryFirst.VSExtension, please leave a review!
                         strategyInfo = Type.GetType("Microsoft.VisualStudio.Data.Tools.SqlEditor.DataModel.DefaultSqlEditorStrategy, Microsoft.VisualStudio.Data.Tools.SqlEditor, Version=17.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
 
                 var ctors = strategyInfo.GetConstructors(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance);
-                    var strategyInstance = ctors[3].Invoke(new object[] { new SqlConnectionStringBuilder(connectionString), true });
+                    object strategyInstance;
+                    try
+                    {
+                        strategyInstance = ctors[3].Invoke(new object[] { new System.Data.SqlClient.SqlConnectionStringBuilder(connectionString), true });
+                    }
+                    catch(Exception ex)
+                    {
+                        strategyInstance = ctors[3].Invoke(new object[] { new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString), true });
+                    }
 
                     var strategySetterInfo = auxiliaryDocData.GetType().GetRuntimeProperties().Where(p => p.Name == "Strategy").FirstOrDefault();
                     strategySetterInfo.SetValue(auxiliaryDocData, strategyInstance);
