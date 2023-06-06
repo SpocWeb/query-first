@@ -317,7 +317,7 @@ protected virtual {state._4ResultClassName} CreatePoco(System.Data.IDataRecord r
             {
 
                 return $@"public string getCommandText({state._8MethodSignature.Trim(spaceComma)}){{
-var queryText = $@""{state._6FinalQueryTextForCode}"";
+var queryText = @""{state._6FinalQueryTextForCode}"";
 
 // Dynamic order by
 if(orderBy != null && orderBy.Length > 0)
@@ -340,7 +340,7 @@ public enum Cols
             else
             {
                 return $@"public string getCommandText({state._8MethodSignature.Trim(spaceComma)}){{
-var queryText = $@""{state._6FinalQueryTextForCode}"";
+var queryText = @""{state._6FinalQueryTextForCode}"";
 // QfExpandoParams
 {string.Join(n, fillExpandoParams)}
 return queryText;
