@@ -8,7 +8,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>queryfirst</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <Version>2.0.2</Version>
+    <Version>2.0.4</Version>
     <Authors>Simon Boddy</Authors>
     <Company />
     <Description>Dotnet global tool for generating a C# wrapper for you .sql files</Description>
