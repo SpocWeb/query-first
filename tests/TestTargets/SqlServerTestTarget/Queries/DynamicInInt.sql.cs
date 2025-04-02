@@ -1,19 +1,10 @@
 namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
-using System.Data.Common;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using QueryFirst;
-using System.Text.RegularExpressions;
-
-using static DynamicInIntQfRepo;
-
-
 using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
 
 public interface IDynamicInIntQfRepo{
 
@@ -55,11 +46,9 @@ public static int ExecuteNonQueryStatic(List<int?> listOfIds)
 => inst.ExecuteNonQuery(listOfIds);
 public virtual int ExecuteNonQuery(List<int?> listOfIds)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(listOfIds, conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(listOfIds, conn);
 }
 
 public static int ExecuteNonQueryStatic(List<int?> listOfIds,IDbConnection conn, IDbTransaction tx = null)
@@ -70,11 +59,10 @@ public virtual int ExecuteNonQuery(List<int?> listOfIds,IDbConnection conn, IDbT
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfIds);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfIds);
 AddParameters(listOfIds,  cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -85,12 +73,11 @@ var result = cmd.ExecuteNonQuery();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 
 #endregion
 
-public string getCommandText(List<int?> listOfIds){
+public static string GetCommandText(List<int?> listOfIds){
 var queryText = $@"/* .sql query managed by QueryFirst add-in */
 /*designTime - put parameter declarations and design time initialization here
 declare @ListOfIds int;
@@ -108,12 +95,10 @@ public static List<DynamicInIntQfDto> ExecuteStatic(List<int?> listOfIds)
 
 public virtual List<DynamicInIntQfDto> Execute(List<int?> listOfIds)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = Execute(listOfIds, conn).ToList();
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = Execute(listOfIds, conn).ToList();
+    return returnVal;
 }
 
 public static IEnumerable<DynamicInIntQfDto> ExecuteStatic(List<int?> listOfIds,IDbConnection conn, IDbTransaction tx = null)
@@ -124,18 +109,15 @@ public virtual IEnumerable<DynamicInIntQfDto> Execute(List<int?> listOfIds,IDbCo
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfIds);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfIds);
 AddParameters(listOfIds,  cmd);
-using (var reader = cmd.ExecuteReader())
-{
+using var reader = cmd.ExecuteReader();
 while (reader.Read())
 {
-yield return Create(reader);
-}
+    yield return Create(reader);
 }
 
 // Assign output parameters to instance properties. These will be available after this method returns.
@@ -144,19 +126,16 @@ yield return Create(reader);
 
 */
 }
-}
 
 
 public static DynamicInIntQfDto GetOneStatic(List<int?> listOfIds)
 => inst.GetOne(listOfIds);
 public virtual DynamicInIntQfDto GetOne(List<int?> listOfIds)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = GetOne(listOfIds, conn);
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = GetOne(listOfIds, conn);
+    return returnVal;
 }
 public static DynamicInIntQfDto GetOneStatic(List<int?> listOfIds,IDbConnection conn, IDbTransaction tx = null)
 => inst.GetOne(listOfIds, conn, tx);
@@ -168,11 +147,9 @@ public virtual DynamicInIntQfDto GetOne(List<int?> listOfIds,IDbConnection conn,
 {
 var all = Execute(listOfIds,  conn,tx);
 DynamicInIntQfDto returnVal;
-using (IEnumerator<DynamicInIntQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<DynamicInIntQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 }
@@ -181,15 +158,13 @@ public static System.Int32? ExecuteScalarStatic(List<int?> listOfIds)
 => inst.ExecuteScalar(listOfIds);
 public virtual System.Int32? ExecuteScalar(List<int?> listOfIds)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = ExecuteScalar(listOfIds, conn);
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = ExecuteScalar(listOfIds, conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -200,11 +175,10 @@ public virtual System.Int32? ExecuteScalar(List<int?> listOfIds,IDbConnection co
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfIds);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfIds);
 AddParameters(listOfIds,  cmd);
 var result = cmd.ExecuteScalar();
 
@@ -214,10 +188,9 @@ var result = cmd.ExecuteScalar();
 
 */
 if( result == null || result == DBNull.Value)
-return null;
+    return null;
 else
-return (System.Int32?)result;
-}
+    return (System.Int32?)result;
 }
 
 
@@ -304,7 +277,7 @@ protected virtual DynamicInIntQfDto CreatePoco(System.Data.IDataRecord record)
 {
     return new DynamicInIntQfDto();
 }
-protected void AddParameters(List<int?> listOfIds,IDbCommand cmd)
+protected static void AddParameters(List<int?> listOfIds,IDbCommand cmd)
 {
 }
 }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace SqlServerTestTarget
@@ -66,8 +63,8 @@ namespace SqlServerTestTarget
 
             TableValuedParametersQfRepo.ExecuteNonQueryStatic(
                 new List<TableValuedParametersQfRepo.TestTableType> {
-                    new TableValuedParametersQfRepo.TestTableType {MyTVPVarchar = "cobber", MYTVPInt = 1236},
-                    new TableValuedParametersQfRepo.TestTableType {MyTVPVarchar = "cobber", MYTVPInt = 1237}
+                    new() {MyTVPVarchar = "cobber", MYTVPInt = 1236},
+                    new() {MyTVPVarchar = "cobber", MYTVPInt = 1237}
                 }
             );
         }

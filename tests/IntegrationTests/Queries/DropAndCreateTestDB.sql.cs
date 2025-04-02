@@ -2,19 +2,10 @@ namespace QueryFirst.IntegrationTests.Queries
 {
     using System;
     using System.Data;
-    using System.Data.Common;
-    using System.IO;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
     using QueryFirst;
-    using System.Text.RegularExpressions;
-
-    using static DropAndCreateTestDBQfRepo;
-
-
     using System.Data.SqlClient;
-    using System.Threading.Tasks;
 
     public interface IDropAndCreateTestDBQfRepo
     {
@@ -59,11 +50,9 @@ namespace QueryFirst.IntegrationTests.Queries
         => inst.ExecuteNonQuery();
         public virtual int ExecuteNonQuery()
         {
-            using (IDbConnection conn = _connectionFactory.CreateConnection())
-            {
-                conn.Open();
-                return ExecuteNonQuery(conn);
-            }
+            using IDbConnection conn = _connectionFactory.CreateConnection();
+            conn.Open();
+            return ExecuteNonQuery(conn);
         }
 
         public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
@@ -74,27 +63,25 @@ namespace QueryFirst.IntegrationTests.Queries
             // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
             ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
                 delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
-            using (IDbCommand cmd = conn.CreateCommand())
-            {
-                if (tx != null)
-                    cmd.Transaction = tx;
-                cmd.CommandText = getCommandText();
-                AddParameters(cmd);
-                var result = cmd.ExecuteNonQuery();
+            using IDbCommand cmd = conn.CreateCommand();
+            if (tx != null)
+                cmd.Transaction = tx;
+            cmd.CommandText = GetCommandText();
+            AddParameters(cmd);
+            var result = cmd.ExecuteNonQuery();
 
-                // Assign output parameters to instance properties. 
-                /*
+            // Assign output parameters to instance properties. 
+            /*
 
                 */
-                // only convert dbnull if nullable
-                return result;
-            }
+            // only convert dbnull if nullable
+            return result;
         }
 
 
         #endregion
 
-        public string getCommandText()
+        public static string GetCommandText()
         {
             var queryText = $@"-- queryfirst
 /*designTime
@@ -182,12 +169,10 @@ sp_who2
 
         public virtual List<DropAndCreateTestDBQfDto> Execute()
         {
-            using (IDbConnection conn = _connectionFactory.CreateConnection())
-            {
-                conn.Open();
-                var returnVal = Execute(conn).ToList();
-                return returnVal;
-            }
+            using IDbConnection conn = _connectionFactory.CreateConnection();
+            conn.Open();
+            var returnVal = Execute(conn).ToList();
+            return returnVal;
         }
 
         public static IEnumerable<DropAndCreateTestDBQfDto> ExecuteStatic(IDbConnection conn, IDbTransaction tx = null)
@@ -198,26 +183,22 @@ sp_who2
             // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
             ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
                 delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
-            using (IDbCommand cmd = conn.CreateCommand())
+            using IDbCommand cmd = conn.CreateCommand();
+            if (tx != null)
+                cmd.Transaction = tx;
+            cmd.CommandText = GetCommandText();
+            AddParameters(cmd);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
             {
-                if (tx != null)
-                    cmd.Transaction = tx;
-                cmd.CommandText = getCommandText();
-                AddParameters(cmd);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        yield return Create(reader);
-                    }
-                }
+                yield return Create(reader);
+            }
 
-                // Assign output parameters to instance properties. These will be available after this method returns.
-                // todo : make output parameters work in a threadsafe way. An output object with execution messages and output parameters?
-                /*
+            // Assign output parameters to instance properties. These will be available after this method returns.
+            // todo : make output parameters work in a threadsafe way. An output object with execution messages and output parameters?
+            /*
 
                 */
-            }
         }
 
 
@@ -225,12 +206,10 @@ sp_who2
         => inst.GetOne();
         public virtual DropAndCreateTestDBQfDto GetOne()
         {
-            using (IDbConnection conn = _connectionFactory.CreateConnection())
-            {
-                conn.Open();
-                var returnVal = GetOne(conn);
-                return returnVal;
-            }
+            using IDbConnection conn = _connectionFactory.CreateConnection();
+            conn.Open();
+            var returnVal = GetOne(conn);
+            return returnVal;
         }
         public static DropAndCreateTestDBQfDto GetOneStatic(IDbConnection conn, IDbTransaction tx = null)
         => inst.GetOne(conn, tx);
@@ -242,11 +221,9 @@ sp_who2
             {
                 var all = Execute(conn, tx);
                 DropAndCreateTestDBQfDto returnVal;
-                using (IEnumerator<DropAndCreateTestDBQfDto> iter = all.GetEnumerator())
-                {
-                    iter.MoveNext();
-                    returnVal = iter.Current;
-                }
+                using IEnumerator<DropAndCreateTestDBQfDto> iter = all.GetEnumerator();
+                iter.MoveNext();
+                returnVal = iter.Current;
                 return returnVal;
             }
         }
@@ -255,15 +232,13 @@ sp_who2
         => inst.ExecuteScalar();
         public virtual System.Int32? ExecuteScalar()
         {
-            using (IDbConnection conn = _connectionFactory.CreateConnection())
-            {
-                conn.Open();
-                var returnVal = ExecuteScalar(conn);
-                /*
+            using IDbConnection conn = _connectionFactory.CreateConnection();
+            conn.Open();
+            var returnVal = ExecuteScalar(conn);
+            /*
                 ;
                 */
-                return returnVal;
-            }
+            return returnVal;
         }
 
 
@@ -274,24 +249,22 @@ sp_who2
             // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
             ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
                 delegate (object sender, SqlInfoMessageEventArgs e) { AppendExececutionMessage(e.Message); });
-            using (IDbCommand cmd = conn.CreateCommand())
-            {
-                if (tx != null)
-                    cmd.Transaction = tx;
-                cmd.CommandText = getCommandText();
-                AddParameters(cmd);
-                var result = cmd.ExecuteScalar();
+            using IDbCommand cmd = conn.CreateCommand();
+            if (tx != null)
+                cmd.Transaction = tx;
+            cmd.CommandText = GetCommandText();
+            AddParameters(cmd);
+            var result = cmd.ExecuteScalar();
 
-                // only convert dbnull if nullable
-                // Assign output parameters to instance properties.
-                /*
+            // only convert dbnull if nullable
+            // Assign output parameters to instance properties.
+            /*
 
                 */
-                if (result == null || result == DBNull.Value)
-                    return null;
-                else
-                    return (System.Int32?)result;
-            }
+            if (result == null || result == DBNull.Value)
+                return null;
+            else
+                return (System.Int32?)result;
         }
 
 
@@ -378,7 +351,7 @@ sp_who2
         {
             return new DropAndCreateTestDBQfDto();
         }
-        protected void AddParameters(IDbCommand cmd)
+        protected static void AddParameters(IDbCommand cmd)
         {
         }
     }

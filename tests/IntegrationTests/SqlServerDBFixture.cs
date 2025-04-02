@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace QueryFirst.IntegrationTests
 {
-    using Microsoft.Extensions.Configuration;
     using Queries;
     using Xunit;
 

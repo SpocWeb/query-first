@@ -1,10 +1,7 @@
 ﻿using System.Data.SqlClient;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.IO;
-using System.Linq;
 
 namespace QueryFirst.Providers
 {
@@ -27,11 +24,11 @@ namespace QueryFirst.Providers
         public virtual int ExecuteNonQuery(string tsql, SqlConnection conn)
         {
             SqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = getCommandText();
+            cmd.CommandText = GetCommandText();
             cmd.Parameters.Add("@tsql", SqlDbType.VarChar, 0).Value = tsql != null ? (object)tsql : DBNull.Value;
             return cmd.ExecuteNonQuery();
         }
-        private string getCommandText()
+        private static string GetCommandText()
         {
             Stream strm = typeof(sp_describe_undeclared_parametersResults).Assembly.GetManifestResourceStream("QueryFirst.Providers.sp_describe_undeclared_parameters.sql");
             string queryText = new StreamReader(strm).ReadToEnd();

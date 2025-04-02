@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -360,7 +359,8 @@ return queryText;
             }
             return pocos.ToString();
         }
-        string makeAPoco(QueryParamInfo param)
+
+        static string makeAPoco(QueryParamInfo param)
         {
             return
 $@"public class {param.InnerCSType}{{
@@ -439,7 +439,7 @@ cmd.Parameters.Add(myParam);
                 return "";
         }
 
-        public string MakeInterface(State state, bool includeAsync)
+        public static string MakeInterface(State state, bool includeAsync)
         {
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();
@@ -503,10 +503,10 @@ Task<int> ExecuteNonQueryAsync(" + state._8MethodSignature + @"IDbConnection con
             return code.ToString();
         }
 
-        public string SelfTestUsings(State state)
+        public static string SelfTestUsings(State state)
             => $@"using Xunit;{n}";
 
-        public string MakeSelfTestMethod(State state)
+        public static string MakeSelfTestMethod(State state)
         {
             char[] spaceComma = new char[] { ',', ' ' };
             StringBuilder code = new StringBuilder();

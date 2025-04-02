@@ -1,22 +1,24 @@
 ﻿using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 
 namespace QueryFirst
 {
     public interface IProvider
     {
-        /// <summary>
-        /// Harvests parameter declarations from the -- design time section. Different DBs have different
-        /// syntaxes for local variable declaration, and this method needs to understand your DBs syntax. 
-        /// A SQL Server declaration for instance looks like DECLARE @myLocalVariable [dataType]
-        /// MySql has SET @myLocalVariable (no datatype).
+        /// <summary> Harvests parameter declarations from the -- design time section. </summary>
+        /// <remarks>
+        /// Different DBs have different syntaxes for local variable declaration,
+        /// and this method needs to understand your DBs syntax.
+        ///  
+        /// A SQL Server declaration for instance looks like `DECLARE @myLocalVariable [dataType]`
+        /// MySql has `SET @myLocalVariable` (no datatype).
         /// Postgres has no local variables, so parameters need to be inferred directly from the text of the query.
-        /// </summary>
-        /// <param name="queryText">The text of the query from which parameters are to be extracted.</param>
-        /// <returns></returns>
+        /// </remarks>
         List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString);
+
+        /// <summary> Finds parameters in the query text that are not declared in the design time section. </summary>
         List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString, out string outputMessage);
+
         /// <summary>
         /// Find undeclared parameters and add them, either in the declarations section of the text (SqlServer, MySql)
         /// or as regular parameters on the command.
@@ -43,27 +45,20 @@ namespace QueryFirst
 
         /// <summary>
         /// 2022 Not used. Are other DBs still supported? 
-        /// Generates the C# method that adds a parameter to the command. Called once for each parameter in the query.
+        /// Generates the C# method that adds a parameter to the command.
+        /// Called once for each parameter in the query.
         /// The method should have the signature...
         /// private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length)
         /// </summary>
-        /// <param name="ctx">The code generation context</param>
-        /// <returns></returns>
         string MakeAddAParameter(State state);
 
         /// <summary>
-        /// The ADO way is not working for Sql Server table valued functions. Here we give providers a chance to 
-        /// do better if the initial attempt returns no rows.
+        /// The ADO way is not working for Sql Server table valued functions.
+        /// Here we give providers a chance to do better if the initial attempt returns no rows.
         /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="sql">The query whose schema we are interested in</param>
-        /// <returns></returns>
         List<ResultFieldDetails> GetQuerySchema2ndAttempt(string sql, string connectionString);
-        /// <summary>
-        /// Provider specific line in Execute methods to listen for execution messages.
-        /// </summary>
-        /// <param name="state"></param>
-        /// <returns></returns>
+
+        /// <summary> Provider specific line in Execute methods to listen for execution messages. </summary>
         string HookUpForExecutionMessages();
 
         /// <summary>

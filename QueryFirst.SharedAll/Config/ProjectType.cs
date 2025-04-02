@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QueryFirst
+﻿namespace QueryFirst
 {
     public class ProjectType
     {
-        public string DetectProjectType()
+        public static string DetectProjectType()
         {
             return "cSharp";
         }

@@ -2,13 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace QueryFirst
 {
     public class Namespace
     {
-        public string SniffProjectNamespace(string fileOrFolderPath)
+        public static string SniffProjectNamespace(string fileOrFolderPath)
         {
             string folderToSearch;
             if (File.Exists(fileOrFolderPath))
@@ -20,7 +19,7 @@ namespace QueryFirst
             return RecurseFolders(folderToSearch);
 
         }
-        private string RecurseFolders(string folderToSearch)
+        private static string RecurseFolders(string folderToSearch)
         {
             var csproj = Directory.EnumerateFiles(folderToSearch)
                 .Where(f => f.ToLower().EndsWith(".csproj"))

@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using TinyIoC;
 
 //[assembly: InternalsVisibleTo("QueryFirstTests")]
 
@@ -49,7 +48,7 @@ namespace QueryFirst.VSExtension
                 var projectConfig = configFileReader.GetProjectConfig(_queryDoc.FullName);
                 var installConfig = configFileReader.GetInstallConfig();
 
-                var projectType = new ProjectType().DetectProjectType();
+                var projectType = ProjectType.DetectProjectType();
 
                 // build config project-install
                 var configBuilder = new ConfigBuilder();
@@ -194,7 +193,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
             }
             return _state;
         }
-        private void WriteAndFormat(ProjectItem genFile, string code)
+        private static void WriteAndFormat(ProjectItem genFile, string code)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             bool rememberToClose = false;
@@ -222,12 +221,12 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         internal void ProcessUpToStep4(string sourcePath, QfConfigModel outerConfig, ref State state)
         {
             // todo: if a .sql is not in the project, this throws null exception. What should it do?
-            new _1ProcessQueryPath().Go(state, sourcePath);
+            _1ProcessQueryPath.Go(state, sourcePath);
 
 
-            new _2ReadQuery().Go(state);
+            _2ReadQuery.Go(state);
             new _3ResolveConfig().BuildUp().Go(state, outerConfig);
-            new _4ResolveNamespace().Go(state);
+            _4ResolveNamespace.Go(state);
         }
         // Doesn't recurse into folders. Prefer items.Item("")
         public static ProjectItem GetItemByFilename(ProjectItem item, string filename)

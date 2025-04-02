@@ -1,10 +1,7 @@
 namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
-using System.Data.Common;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using QueryFirst;
 using System.Text.RegularExpressions;
@@ -13,7 +10,6 @@ using static TestDynamicOrderByQfRepo;
 
 
 using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
 
 public interface ITestDynamicOrderByQfRepo{
 
@@ -55,11 +51,9 @@ public static int ExecuteNonQueryStatic((Cols col, bool descending)[] orderBy)
 => inst.ExecuteNonQuery(orderBy);
 public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(orderBy,conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(orderBy,conn);
 }
 
 public static int ExecuteNonQueryStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
@@ -70,11 +64,10 @@ public virtual int ExecuteNonQuery((Cols col, bool descending)[] orderBy,IDbConn
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(orderBy);
 AddParameters(orderBy, cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -85,12 +78,11 @@ var result = cmd.ExecuteNonQuery();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 
 #endregion
 
-public string getCommandText((Cols col, bool descending)[] orderBy){
+public static string GetCommandText((Cols col, bool descending)[] orderBy){
 var queryText = $@"-- use queryfirst
 /*designTime
 
@@ -148,12 +140,10 @@ public static List<TestDynamicOrderByQfDto> ExecuteStatic((Cols col, bool descen
 
 public virtual List<TestDynamicOrderByQfDto> Execute((Cols col, bool descending)[] orderBy)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = Execute(orderBy,conn).ToList();
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = Execute(orderBy,conn).ToList();
+    return returnVal;
 }
 
 public static IEnumerable<TestDynamicOrderByQfDto> ExecuteStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
@@ -164,18 +154,15 @@ public virtual IEnumerable<TestDynamicOrderByQfDto> Execute((Cols col, bool desc
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(orderBy);
 AddParameters(orderBy, cmd);
-using (var reader = cmd.ExecuteReader())
-{
+using var reader = cmd.ExecuteReader();
 while (reader.Read())
 {
-yield return Create(reader);
-}
+    yield return Create(reader);
 }
 
 // Assign output parameters to instance properties. These will be available after this method returns.
@@ -184,19 +171,16 @@ yield return Create(reader);
 
 */
 }
-}
 
 
 public static TestDynamicOrderByQfDto GetOneStatic((Cols col, bool descending)[] orderBy)
 => inst.GetOne(orderBy);
 public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orderBy)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = GetOne(orderBy,conn);
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = GetOne(orderBy,conn);
+    return returnVal;
 }
 public static TestDynamicOrderByQfDto GetOneStatic((Cols col, bool descending)[] orderBy,IDbConnection conn, IDbTransaction tx = null)
 => inst.GetOne(orderBy,conn, tx);
@@ -208,11 +192,9 @@ public virtual TestDynamicOrderByQfDto GetOne((Cols col, bool descending)[] orde
 {
 var all = Execute(orderBy, conn,tx);
 TestDynamicOrderByQfDto returnVal;
-using (IEnumerator<TestDynamicOrderByQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<TestDynamicOrderByQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 }
@@ -221,15 +203,13 @@ public static System.Int32? ExecuteScalarStatic((Cols col, bool descending)[] or
 => inst.ExecuteScalar(orderBy);
 public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = ExecuteScalar(orderBy,conn);
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = ExecuteScalar(orderBy,conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -240,11 +220,10 @@ public virtual System.Int32? ExecuteScalar((Cols col, bool descending)[] orderBy
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(orderBy);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(orderBy);
 AddParameters(orderBy, cmd);
 var result = cmd.ExecuteScalar();
 
@@ -254,10 +233,9 @@ var result = cmd.ExecuteScalar();
 
 */
 if( result == null || result == DBNull.Value)
-return null;
+    return null;
 else
-return (System.Int32?)result;
-}
+    return (System.Int32?)result;
 }
 
 
@@ -344,7 +322,7 @@ protected virtual TestDynamicOrderByQfDto CreatePoco(System.Data.IDataRecord rec
 {
     return new TestDynamicOrderByQfDto();
 }
-protected void AddParameters((Cols col, bool descending)[] orderBy,IDbCommand cmd)
+protected static void AddParameters((Cols col, bool descending)[] orderBy,IDbCommand cmd)
 {
 }
 }

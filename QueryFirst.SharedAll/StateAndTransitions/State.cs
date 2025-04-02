@@ -1,43 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-/// <summary>
-/// CodeGenerationContext had a bunch of properties that were set on first use. It's simple stuff,
-/// but regexes and string manip were mixed with EnvDTE references and file access. It wasn't testable
-/// and it couldn't be used outside of VS. 
-/// 
-/// Here, we want to build up state while mastering the order in which
-/// things happen, and totally freeing ourselves from EnvDTE and other dependencies.
-/// 
-/// Properties are numbered so from any given prop you can depend on props lower in the order.
-/// </summary>
 namespace QueryFirst
 {
+    /// <summary> CodeGenerationContext had a bunch of properties that were set on first use. </summary>
+    /// <remarks>
+    /// It's simple stuff, but regexes and string manip were mixed with EnvDTE references and file access.
+    /// It wasn't testable and it couldn't be used outside of VS. 
+    /// 
+    /// Here, we want to build up state while mastering the order in which
+    /// things happen, and totally freeing ourselves from EnvDTE and other dependencies.
+    /// 
+    /// Properties are numbered so from any given prop you can depend on props lower in the order.
+    /// </remarks>
     public class State
     {
-        /// <summary>
-        /// The full path and filename of the current SQL query.
+        /// <summary> The full path and filename of the current SQL query.
         /// </summary>
         public string _1SourceQueryFullPath { get; set; }
+
         /// <summary>
         /// The name of the query file, without extension. Used to infer the filenames of code classes, and to generate the wrapper class name.
         /// </summary>
         public string _1BaseName { get; set; }
+
         /// <summary>
         /// The directory containing the 3 files for this query, with trailing slash
         /// </summary>
         public string _1CurrDir { get; set; }
+
         public string _4RepoClassName { get; set; }
         public string _4ResultClassName { get; set; }
         public string _4ResultInterfaceName { get; set; }
         public string _4Namespace { get; set; }
-        /// <summary>
-        /// Full text of the user partial file for in-memory compilation
-        /// </summary>
-        //public string _4UserPartialFullText { get; set; }
+
+        ///// <summary>
+        ///// Full text of the user partial file for in-memory compilation
+        ///// </summary>
+        ////public string _4UserPartialFullText { get; set; }
+
         /// <summary>
         /// The unmodified text of the SQL query. The full contents of the .sql file when the user saves.
         /// </summary>
@@ -79,18 +79,21 @@ namespace QueryFirst
         /// Full method signature with out and ref parameters for OUTPUT and IN/OUT sql params
         /// </summary>
         public string _8MethodSignature { get; set; }
-        /// <summary>
-        /// The inner exec methods don't have output parameters in their signature
-        /// </summary>
-        //public string _8InputOnlyMethodSignature { get; set; }
+
+        ///// <summary>
+        ///// The inner exec methods don't have output parameters in their signature
+        ///// </summary>
+        ////public string _8InputOnlyMethodSignature { get; set; }
         /// <summary>
         /// string for calling inner exec methods, without out and ref params
         /// </summary>
         public string _8CallingArgs { get; set; }
-        /// <summary>
-        /// string for calling inner exec methods, without out and ref params
-        /// </summary>
-        //public string _8InputOnlyCallingArgs { get; set; }
+
+        ///// <summary>
+        ///// string for calling inner exec methods, without out and ref params
+        ///// </summary>
+        ////public string _8InputOnlyCallingArgs { get; set; }
+
         /// <summary>
         /// We need this provider-specific text in the wrapper class maker, but we have no provider, so we'll tuck it away here.
         /// </summary>

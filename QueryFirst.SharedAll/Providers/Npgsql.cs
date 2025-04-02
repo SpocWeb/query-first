@@ -1,104 +1,79 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace QueryFirst.Providers
 {
+    /// <summary> open-source .NET Data Provider for PostgreSQL </summary>
     [RegistrationName("Npgsql")]
-    public class Npgsql : IProvider
+    public class NpgSql : IProvider
     {
-        public IDbConnection GetConnection(string connectionString)
-        {
-            return new NpgsqlConnection(connectionString);
-        }
+        private const string NpgSqlMakeAddAParameter =
+            @"private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length, int Scale, int Precision)
+{
+    var myParam = new Npgsql.NpgsqlParameter();
+    myParam.ParameterName = DbName;
+    if(DbType != """")
+    myParam.DbType = (DbType)System.Enum.Parse(typeof(DbType), DbType);
+    myParam.Value = Value != null ? Value : DBNull.Value;
+    Cmd.Parameters.Add(myParam);
+}";
+
+        public IDbConnection GetConnection(string connectionString) => new NpgsqlConnection(connectionString);
+
         public List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString)
+            => NpgSqlExtensions.FindUndeclaredParameters(queryText);
+
+        public string TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true)
+            => NpgSqlExtensions._TypeMapDB2CS(DBType, out DBTypeNormalized, nullable);
+
+        public string ConstructParameterDeclarations(List<QueryParamInfo> foundParams) => null;
+
+        public virtual string MakeAddAParameter(State state) => NpgSqlMakeAddAParameter;
+
+        public List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString,
+            out string outputMessage)
         {
-            return FindUndeclaredParameters(queryText, connectionString, out string outputMessage);
-        }
-        public List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString, out string outputMessage)
-        {
-            var queryParams = new List<QueryParamInfo>();
-            var matchParams = Regex.Matches(queryText, "(:|@)\\w*");
-            if (matchParams.Count > 0)
-            {
-                var myParams = new List<QueryParamInfo>();
-                foreach (Match foundOne in matchParams)
-                {
-                    DbType myDbType;
-                    string name;
-                    string UserDeclaredType = null;
-                    var parts = foundOne.Value.Split('_');
-                    if (parts.Length > 1)
-                    {
-                        UserDeclaredType = parts[parts.Length - 1];
-                        // just to verify. Does this throw?
-                        myDbType = (DbType)System.Enum.Parse(typeof(DbType), UserDeclaredType);
-                        name = foundOne.Value.Substring(1, foundOne.Value.Length - UserDeclaredType.Length - 2); // strip type to form csName
-                    }
-                    else
-                    {
-                        name = foundOne.Value.Substring(1);
-                        UserDeclaredType = "";
-                    }
-                    var qp = TinyIoCContainer.Current.Resolve<QueryParamInfo>();
-                    qp.CSNameCamel = char.ToLower(name.First()) + name.Substring(1);
-                    qp.CSNamePascal = char.ToUpper(name.First()) + name.Substring(1);
-                    qp.CSNamePrivate = "_" + qp.CSNameCamel;
-                    qp.DbName = foundOne.Value;
-                    qp.DbType = UserDeclaredType;
-                    if (DBType2CSType.ContainsKey(UserDeclaredType))
-                        qp.CSType = DBType2CSType[UserDeclaredType];
-                    else
-                        qp.CSType = "object"; //lots of convertibility, will do till I figure out how NpgsqlTypes works. Not an enum. Doesn't have half the values listed in the table.
-                    queryParams.Add(qp);
-                }
-            }
             outputMessage = null;
-            return queryParams;
+            return NpgSqlExtensions.FindUndeclaredParameters(queryText);
         }
-        public string ConstructParameterDeclarations(List<QueryParamInfo> foundParams)
-        {
-            // nothing to do here.
-            return null;
-        }
+
         public void PrepareParametersForSchemaFetching(IDbCommand cmd)
         {
             // no notion of declaring parameters in Postgres
-            // refacto, will this work harvesting connection string from passed command !
-            foreach (var queryParam in FindUndeclaredParameters(cmd.CommandText, cmd.Connection.ConnectionString, out string outputMessage))
+            // refactor, will this work harvesting connection string from passed command !
+            foreach (var queryParam in NpgSqlExtensions.FindUndeclaredParameters(cmd.CommandText))
             {
-                var myParam = new global::Npgsql.NpgsqlParameter();
-                myParam.ParameterName = queryParam.DbName;
+                var myParam = new NpgsqlParameter
+                {
+                    ParameterName = queryParam.DbName
+                };
                 if (!string.IsNullOrEmpty(queryParam.DbType))
                 {
-                    myParam.DbType = (DbType)System.Enum.Parse(typeof(DbType), queryParam.DbType);
+                    myParam.DbType = (DbType)Enum.Parse(typeof(DbType), queryParam.DbType);
                 }
+
                 myParam.Value = DBNull.Value;
                 cmd.Parameters.Add(myParam);
             }
 
         }
-        public virtual string MakeAddAParameter(State state)
-        {
-            StringBuilder code = new StringBuilder();
-            code.AppendLine("private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length, int Scale, int Precision)\n{");
-            code.AppendLine("var myParam = new Npgsql.NpgsqlParameter();");
-            code.AppendLine("myParam.ParameterName = DbName;");
-            code.AppendLine("if(DbType != \"\")");
-            code.AppendLine("myParam.DbType = (DbType)System.Enum.Parse(typeof(DbType), DbType);");
-            code.AppendLine("myParam.Value = Value != null ? Value : DBNull.Value; ");
-            code.AppendLine("Cmd.Parameters.Add(myParam);");
-            code.AppendLine("}");
-            return code.ToString();
-        }
 
-        private Dictionary<string, string> DBType2CSType = new Dictionary<string, string>
+        /// <summary> No implementation for Postgres </summary>
+        public List<ResultFieldDetails> GetQuerySchema2ndAttempt(string sql, string connectionString) => null;
+
+        public string HookUpForExecutionMessages() => "";
+
+        public string GetProviderSpecificUsings() => "";
+    }
+
+    public static class NpgSqlExtensions
+    {
+
+        private static readonly Dictionary<string, string> DbType2CsType = new Dictionary<string, string>()
         {
             {"Boolean","bool" },
             {"Int16","short" },
@@ -120,76 +95,114 @@ namespace QueryFirst.Providers
             {"Binary","byte[]" }
         };
 
-        public string TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true)
+        public static List<QueryParamInfo> FindUndeclaredParameters(string queryText)
+        {
+            var queryParams = new List<QueryParamInfo>();
+            var matchParams = Regex.Matches(queryText, "(:|@)\\w*");
+            if (matchParams.Count <= 0)
+            {
+                return queryParams;
+            }
+
+            foreach (Match foundOne in matchParams)
+            {
+                string name;
+                string userDeclaredType;
+                var parts = foundOne.Value.Split('_');
+                if (parts.Length > 1)
+                {
+                    userDeclaredType = parts[parts.Length - 1];
+                    // just to verify. Does this throw?
+                    _ = (DbType)Enum.Parse(typeof(DbType), userDeclaredType);
+                    name = foundOne.Value.Substring(1, foundOne.Value.Length - userDeclaredType.Length - 2); // strip type to form csName
+                }
+                else
+                {
+                    name = foundOne.Value.Substring(1);
+                    userDeclaredType = "";
+                }
+                var qp = TinyIoCContainer.Current.Resolve<QueryParamInfo>();
+                qp.CSNameCamel = char.ToLower(name.First()) + name.Substring(1);
+                qp.CSNamePascal = char.ToUpper(name.First()) + name.Substring(1);
+                qp.CSNamePrivate = "_" + qp.CSNameCamel;
+                qp.DbName = foundOne.Value;
+                qp.DbType = userDeclaredType;
+                qp.CSType = DbType2CsType.ContainsKey(userDeclaredType) ? DbType2CsType[userDeclaredType] : "object"; //lots of convertibility, will do till I figure out how NpgsqlTypes works. Not an enum. Doesn't have half the values listed in the table.
+                queryParams.Add(qp);
+            }
+            return queryParams;
+        }
+
+        public static string _TypeMapDB2CS(string dbType, out string dbTypeNormalized, bool nullable = true)
         {
             // http://www.npgsql.org/doc/types.html
-            switch (DBType.ToLower())
+            switch (dbType.ToLower())
             {
                 case "bool":
                 case "boolean":
-                    DBTypeNormalized = "Boolean";
+                    dbTypeNormalized = "Boolean";
                     return nullable ? "bool?" : "bool";
                 case "int2":
                 case "smallint":
-                    DBTypeNormalized = "Smallint";
+                    dbTypeNormalized = "Smallint";
                     return nullable ? "short?" : "short";
                 case "int4":
                 case "integer":
-                    DBTypeNormalized = "Integer";
+                    dbTypeNormalized = "Integer";
                     return nullable ? "int?" : "int";
                 case "int8":
                 case "bigint":
-                    DBTypeNormalized = "Bigint";
+                    dbTypeNormalized = "Bigint";
                     return nullable ? "long?" : "long";
                 case "float4":
                 case "real":
-                    DBTypeNormalized = "Real";
+                    dbTypeNormalized = "Real";
                     return nullable ? "float?" : "float";
                 case "float8":
                 case "double":
-                    DBTypeNormalized = "Double";
+                    dbTypeNormalized = "Double";
                     return nullable ? "double?" : "double";
                 case "numeric":
-                    DBTypeNormalized = "Numeric";
+                    dbTypeNormalized = "Numeric";
                     return nullable ? "decimal?" : "decimal";
                 case "money":
-                    DBTypeNormalized = "Money";
+                    dbTypeNormalized = "Money";
                     return nullable ? "decimal?" : "decimal";
                 case "text":
-                    DBTypeNormalized = "Text";
+                    dbTypeNormalized = "Text";
                     return "string";
                 case "varchar":
-                    DBTypeNormalized = "Varchar";
+                    dbTypeNormalized = "Varchar";
                     return "string";
                 case "char":
-                    DBTypeNormalized = "Char";
+                    dbTypeNormalized = "Char";
                     return "string";
                 case "citext":
-                    DBTypeNormalized = "Citext";
+                    dbTypeNormalized = "Citext";
                     return "string";
                 case "json":
-                    DBTypeNormalized = "Json";
+                    dbTypeNormalized = "Json";
                     return "string";
                 case "jsonb":
-                    DBTypeNormalized = "Jsonb";
+                    dbTypeNormalized = "Jsonb";
                     return "string";
                 case "xml":
-                    DBTypeNormalized = "Xml";
+                    dbTypeNormalized = "Xml";
                     return "string";
                 case "point":
-                    DBTypeNormalized = "Point";
+                    dbTypeNormalized = "Point";
                     return "NpgsqlPoint";
                 case "lseg":
-                    DBTypeNormalized = "LSeg";
+                    dbTypeNormalized = "LSeg";
                     return "NpgsqlLSeg";
                 case "path":
-                    DBTypeNormalized = "Path";
+                    dbTypeNormalized = "Path";
                     return "NpgsqlPath";
                 case "polygon":
-                    DBTypeNormalized = "Polygon";
+                    dbTypeNormalized = "Polygon";
                     return "NpgsqlPolygon";
                 default:
-                    DBTypeNormalized = null;
+                    dbTypeNormalized = null;
                     return "object";
             }
 
@@ -224,22 +237,5 @@ namespace QueryFirst.Providers
             //InternalChar internalchar byte
             //Geometry geometry PostgisGeometry
         }
-        /// <summary>
-        /// No implementation for Postgres
-        /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="sql"></param>
-        /// <returns></returns>
-        public List<ResultFieldDetails> GetQuerySchema2ndAttempt(string sql, string connectionString)
-        {
-            return null;
-        }
-
-        public string HookUpForExecutionMessages()
-        {
-            return "";
-        }
-
-        public string GetProviderSpecificUsings() => "";
     }
 }

@@ -1,19 +1,10 @@
 namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
-using System.Data.Common;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using QueryFirst;
-using System.Text.RegularExpressions;
-
-using static ExpandableInQfRepo;
-
-
 using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
 
 public interface IExpandableInQfRepo{
 
@@ -55,11 +46,9 @@ public static int ExecuteNonQueryStatic(List<int?> listOfInts)
 => inst.ExecuteNonQuery(listOfInts);
 public virtual int ExecuteNonQuery(List<int?> listOfInts)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(listOfInts, conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(listOfInts, conn);
 }
 
 public static int ExecuteNonQueryStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
@@ -70,11 +59,10 @@ public virtual int ExecuteNonQuery(List<int?> listOfInts,IDbConnection conn, IDb
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfInts);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfInts);
 AddParameters(listOfInts,  cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -85,12 +73,11 @@ var result = cmd.ExecuteNonQuery();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 
 #endregion
 
-public string getCommandText(List<int?> listOfInts){
+public static string GetCommandText(List<int?> listOfInts){
 var queryText = $@"/* .sql query managed by QueryFirst add-in */
 /*designTime
 declare @ListOfInts int;
@@ -112,12 +99,10 @@ public static List<ExpandableInQfDto> ExecuteStatic(List<int?> listOfInts)
 
 public virtual List<ExpandableInQfDto> Execute(List<int?> listOfInts)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = Execute(listOfInts, conn).ToList();
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = Execute(listOfInts, conn).ToList();
+    return returnVal;
 }
 
 public static IEnumerable<ExpandableInQfDto> ExecuteStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
@@ -128,18 +113,15 @@ public virtual IEnumerable<ExpandableInQfDto> Execute(List<int?> listOfInts,IDbC
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfInts);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfInts);
 AddParameters(listOfInts,  cmd);
-using (var reader = cmd.ExecuteReader())
-{
+using var reader = cmd.ExecuteReader();
 while (reader.Read())
 {
-yield return Create(reader);
-}
+    yield return Create(reader);
 }
 
 // Assign output parameters to instance properties. These will be available after this method returns.
@@ -148,19 +130,16 @@ yield return Create(reader);
 
 */
 }
-}
 
 
 public static ExpandableInQfDto GetOneStatic(List<int?> listOfInts)
 => inst.GetOne(listOfInts);
 public virtual ExpandableInQfDto GetOne(List<int?> listOfInts)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = GetOne(listOfInts, conn);
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = GetOne(listOfInts, conn);
+    return returnVal;
 }
 public static ExpandableInQfDto GetOneStatic(List<int?> listOfInts,IDbConnection conn, IDbTransaction tx = null)
 => inst.GetOne(listOfInts, conn, tx);
@@ -172,11 +151,9 @@ public virtual ExpandableInQfDto GetOne(List<int?> listOfInts,IDbConnection conn
 {
 var all = Execute(listOfInts,  conn,tx);
 ExpandableInQfDto returnVal;
-using (IEnumerator<ExpandableInQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<ExpandableInQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 }
@@ -185,15 +162,13 @@ public static System.Int32? ExecuteScalarStatic(List<int?> listOfInts)
 => inst.ExecuteScalar(listOfInts);
 public virtual System.Int32? ExecuteScalar(List<int?> listOfInts)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = ExecuteScalar(listOfInts, conn);
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = ExecuteScalar(listOfInts, conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -204,11 +179,10 @@ public virtual System.Int32? ExecuteScalar(List<int?> listOfInts,IDbConnection c
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(listOfInts);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(listOfInts);
 AddParameters(listOfInts,  cmd);
 var result = cmd.ExecuteScalar();
 
@@ -218,10 +192,9 @@ var result = cmd.ExecuteScalar();
 
 */
 if( result == null || result == DBNull.Value)
-return null;
+    return null;
 else
-return (System.Int32?)result;
-}
+    return (System.Int32?)result;
 }
 
 
@@ -308,7 +281,7 @@ protected virtual ExpandableInQfDto CreatePoco(System.Data.IDataRecord record)
 {
     return new ExpandableInQfDto();
 }
-protected void AddParameters(List<int?> listOfInts,IDbCommand cmd)
+protected static void AddParameters(List<int?> listOfInts,IDbCommand cmd)
 {
 }
 }

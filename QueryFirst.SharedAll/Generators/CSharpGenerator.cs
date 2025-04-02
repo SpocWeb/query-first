@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryFirst.Generators
 {
@@ -31,10 +28,10 @@ namespace QueryFirst.Generators
             Code.Append(_wrapper.StartNamespace(state));
             Code.Append(_wrapper.Usings(state));
             if (state._3Config.MakeSelfTest.GetValueOrDefault())
-                Code.Append(_wrapper.SelfTestUsings(state));
+                Code.Append(WrapperClassMaker.SelfTestUsings(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
                 Code.Append(_results.Usings());
-            Code.Append(_wrapper.MakeInterface(state, generateAsync));
+            Code.Append(WrapperClassMaker.MakeInterface(state, generateAsync));
             Code.Append(_wrapper.StartClass(state));
             Code.AppendLine("");
             Code.AppendLine("#region Sync");
@@ -57,7 +54,7 @@ namespace QueryFirst.Generators
             Code.Append(_wrapper.MakeTvpPocos(state));
 
             if (state._3Config.MakeSelfTest.GetValueOrDefault())
-                Code.Append(_wrapper.MakeSelfTestMethod(state));
+                Code.Append(WrapperClassMaker.MakeSelfTestMethod(state));
             if (state._7ResultFields != null && state._7ResultFields.Count > 0)
             {
                 Code.AppendLine("");

@@ -7,45 +7,92 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+#if VS16
+#else
+using SqlConnection = Microsoft.Data.SqlClient.SqlConnection;
+#endif
 
 namespace QueryFirst.Providers
 {
     [RegistrationName("System.Data.SqlClient")]
     public class SqlClient : IProvider
     {
-        public virtual IDbConnection GetConnection(string connectionString)
-        {
-            return new System.Data.SqlClient.SqlConnection(connectionString);
-        }
+        private const string SqlServerHookUpForExecutionMessages =
+            @"// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
+((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
+    delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });";
+
+        private const string SqlServerUsings = @"using System.Data.SqlClient;
+using System.Threading.Tasks;
+";
+
+        public virtual string HookUpForExecutionMessages() => SqlServerHookUpForExecutionMessages;
+
+        public virtual string GetProviderSpecificUsings() => SqlServerUsings;
+
+        public virtual IDbConnection GetConnection(string connectionString) => new SqlConnection(connectionString);
+
         public virtual List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString)
+            => new SqlConnection(connectionString)._ParseDeclaredParameters(queryText);
+
+        public virtual string TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true) =>
+            SqlServerExtensions._TypeMapDB2CS(DBType, out DBTypeNormalized, nullable);
+
+        public virtual string MakeAddAParameter(State state) => SqlServerExtensions.MakeAddAParameter(state);
+
+        public List<ResultFieldDetails> GetQuerySchema2ndAttempt(string sql, string connectionString)
+        {
+            using (var conn = GetConnection(connectionString))
+                return conn.GetQuerySchema2ndAttempt(sql);
+        }
+
+        public virtual void PrepareParametersForSchemaFetching(IDbCommand cmd)
+        {
+            // nothing to do here.
+        }
+
+        public virtual List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString,
+            out string outputMessage)
+        {
+            using (var conn = GetConnection(connectionString))
+                return SqlServerExtensions._FindUndeclaredParameters(conn, queryText, out outputMessage);
+        }
+
+        public string ConstructParameterDeclarations(List<QueryParamInfo> foundParams)
+            => SqlServerExtensions._ConstructParameterDeclarations(foundParams);
+    }
+
+    public static class SqlServerExtensions
+    {
+        public static List<QueryParamInfo> _ParseDeclaredParameters(this SqlConnection conn, string queryText)
         {
             var textParams = ExtractParamsFromText(queryText);
             var queryParams = new List<QueryParamInfo>();
-            QueryParamInfo qp;
-            for (var i = 0; i < textParams.Count; i++)
+            foreach (var para in textParams)
             {
+                QueryParamInfo qp;
                 try
                 {
-                    qp = GetParamInfo(textParams[i].SqlName, textParams[i].SqlTypeAndLength);
+                    qp = GetParamInfo(para.SqlName, para.SqlTypeAndLength);
                 }
                 catch (TypeNotMatchedException)
                 {
                     try
                     {
-                        qp = GetParamInfoSecondAttempt(textParams[i].SqlTypeAndLength, textParams[i].SqlName, connectionString);
+                        qp = GetParamInfoSecondAttempt(conn, para.SqlTypeAndLength, para.SqlName);
                     }
                     catch (Exception ex)
                     {
-                        throw new TypeNotMatchedException("Unable to find a type for " + textParams[i].SqlTypeAndLength, ex);
+                        throw new TypeNotMatchedException("Unable to find a type for " + para.SqlTypeAndLength, ex);
                     }
                 }
                 // direction
-                if ((textParams[i].Direction ?? "").ToLower() == "--inout")
+                if ((para.Direction ?? "").ToLower() == "--inout")
                 {
                     qp.IsInput = true;
                     qp.IsOutput = true;
                 }
-                else if ((textParams[i].Direction ?? "").ToLower() == "--output")
+                else if ((para.Direction ?? "").ToLower() == "--output")
                     qp.IsOutput = true;
                 else
                     qp.IsInput = true;
@@ -56,9 +103,8 @@ namespace QueryFirst.Providers
         }
 
 
-        List<ParamFromText> ExtractParamsFromText(string queryText)
+        public static List<ParamFromText> ExtractParamsFromText(string queryText)
         {
-            int i = 0;
             var queryParams = new List<ParamFromText>();
             // get design time section
             var dt = Regex.Match(queryText, "-- designTime(?<designTime>.*)-- endDesignTime", RegexOptions.Singleline).Value;
@@ -67,7 +113,6 @@ namespace QueryFirst.Providers
             Match m = Regex.Match(dt, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
             while (m.Success)
             {
-                string[] parts = m.Value.Split(new[] { ' ', '	' }, StringSplitOptions.RemoveEmptyEntries);
                 queryParams.Add(new ParamFromText
                 {
                     SqlName = m.Groups["name"].Value,
@@ -75,11 +120,11 @@ namespace QueryFirst.Providers
                     Direction = m.Groups["restOfLine"].Value
                 });
                 m = m.NextMatch();
-                i++;
             }
             return queryParams;
         }
-        QueryParamInfo GetParamInfo(string name, string sqlTypeAndLength)
+
+        static QueryParamInfo GetParamInfo(string name, string sqlTypeAndLength)
         {
             var qp = new QueryParamInfo();
             var m = Regex.Match(sqlTypeAndLength, @"(?'type'^\w*)\(?(?'firstNum'\d*),?(?'secondNum'\d*)");
@@ -128,92 +173,84 @@ namespace QueryFirst.Providers
         }
 
         /// <summary>
-        /// First attempt matches system types using local type map. Here we're going to deal with user defined table types as input parameters.
+        /// First attempt matches system types using local type map.
+        /// Here we're going to deal with user defined table types as input parameters.
         /// </summary>
-        /// <param name="queryText"></param>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
-        private QueryParamInfo GetParamInfoSecondAttempt(string paramType, string paramName, string connectionString)
+        private static QueryParamInfo GetParamInfoSecondAttempt(this SqlConnection conn, string paramType, string paramName)
         {
             // Table Valued Parameters...
-#if VS16
-            var conn = new SqlConnection(connectionString);
-#else
-            var conn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-#endif
-            Server s = new Server(new ServerConnection(conn, null));
+            var s = new Server(new ServerConnection(conn, null));
             var myDb = s.Databases.Cast<Database>().Where(db => db.Name == conn.Database).FirstOrDefault();
             var type = myDb.UserDefinedTableTypes.Cast<UserDefinedTableType>().Where(t => t.Name == paramType);
 
-            if (type.Count() > 0)
-            {
-                var returnVal = new QueryParamInfo
-                {
-                    CSNameCamel = paramName.First().ToString().ToLower() + paramName.Substring(1),
-                    CSNamePascal = paramName.First().ToString().ToUpper() + paramName.Substring(1),
-                    DbName = "@" + paramName,
-                    //DbType = type.First().Urn.Type,
-                    DbType = paramType,
-                    CSType = $"IEnumerable<{paramType.First().ToString().ToUpper() + paramType.Substring(1)}>",
-                    InnerCSType = paramType.First().ToString().ToUpper() + paramType.Substring(1),
-                    IsTableType = true,
-                    ParamSchema = new List<QueryParamInfo>()
-                };
-                foreach (Column col in type.First().Columns)
-                {
-                    string normalizedType;
-                    var csType = TypeMapDB2CS(col.DataType.Name, out normalizedType);
-
-                    returnVal.ParamSchema.Add(new QueryParamInfo
-                    {
-                        CSNameCamel = char.ToLower(col.Name.First()) + col.Name.Substring(1),
-                        CSNamePascal = char.ToUpper(col.Name.First()) + col.Name.Substring(1),
-                        DbType = normalizedType,
-                        CSType = csType,
-                        DbName = '@' + col.Name
-
-                    });
-                }
-                return returnVal;
-            }
-            else
+            if (type.Count() <= 0)
             {
                 throw new TypeNotMatchedException("No user defined type to match " + paramType);
             }
+
+            var returnVal = new QueryParamInfo
+            {
+                CSNameCamel = paramName.First().ToString().ToLower() + paramName.Substring(1),
+                CSNamePascal = paramName.First().ToString().ToUpper() + paramName.Substring(1),
+                DbName = "@" + paramName,
+                //DbType = type.First().Urn.Type,
+                DbType = paramType,
+                CSType = $"IEnumerable<{paramType.First().ToString().ToUpper() + paramType.Substring(1)}>",
+                InnerCSType = paramType.First().ToString().ToUpper() + paramType.Substring(1),
+                IsTableType = true,
+                ParamSchema = new List<QueryParamInfo>()
+            };
+            foreach (Column col in type.First().Columns)
+            {
+                string normalizedType;
+                var csType = _TypeMapDB2CS(col.DataType.Name, out normalizedType);
+
+                returnVal.ParamSchema.Add(new QueryParamInfo
+                {
+                    CSNameCamel = char.ToLower(col.Name.First()) + col.Name.Substring(1),
+                    CSNamePascal = char.ToUpper(col.Name.First()) + col.Name.Substring(1),
+                    DbType = normalizedType,
+                    CSType = csType,
+                    DbName = '@' + col.Name
+
+                });
+            }
+            return returnVal;
+
         }
-        public virtual List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString, out string outputMessage)
+
+        public static List<QueryParamInfo> _FindUndeclaredParameters(this IDbConnection conn, string queryText, out string outputMessage)
         {
             outputMessage = null;
             var myParams = new List<QueryParamInfo>();
             // sp_describe_undeclared_parameters
             try
             {
-                using (IDbConnection conn = GetConnection(connectionString))
+                IDbCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "sp_describe_undeclared_parameters @tsql";
+                var tsql = new SqlParameter("@tsql", SqlDbType.NChar)
                 {
-                    IDbCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "sp_describe_undeclared_parameters @tsql";
-                    var tsql = new SqlParameter("@tsql", SqlDbType.NChar);
-                    tsql.Value = queryText;
-                    cmd.Parameters.Add(tsql);
+                    Value = queryText
+                };
+                cmd.Parameters.Add(tsql);
 
-                    conn.Open();
-                    var rdr = cmd.ExecuteReader();
-                    while (rdr.Read())
+                conn.Open();
+                var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    // ignore global variables
+                    if (rdr.GetString(1).Substring(0, 2) != "@@")
                     {
-                        // ignore global variables
-                        if (rdr.GetString(1).Substring(0, 2) != "@@")
+                        // build declaration.
+                        myParams.Add(new QueryParamInfo()
                         {
-                            // build declaration.
-                            myParams.Add(new QueryParamInfo()
-                            {
-                                DbName = rdr.GetString(1),
-                                DbType = rdr.GetString(3),
-                                Length = rdr.GetInt16(4),
-                                IsInput = rdr.GetBoolean(19),
-                                IsOutput = rdr.GetBoolean(20)
-                            }
-                                );
+                            DbName = rdr.GetString(1),
+                            DbType = rdr.GetString(3),
+                            Length = rdr.GetInt16(4),
+                            IsInput = rdr.GetBoolean(19),
+                            IsOutput = rdr.GetBoolean(20)
                         }
+                            );
                     }
                 }
             }
@@ -223,12 +260,7 @@ namespace QueryFirst.Providers
             }
             return myParams;
         }
-        public virtual void PrepareParametersForSchemaFetching(IDbCommand cmd)
-        {
-            // nothing to do here.
-        }
-
-        public string ConstructParameterDeclarations(List<QueryParamInfo> foundParams)
+        public static string _ConstructParameterDeclarations(List<QueryParamInfo> foundParams)
         {
             StringBuilder bldr = new StringBuilder();
 
@@ -252,7 +284,7 @@ namespace QueryFirst.Providers
             }
             return bldr.ToString();
         }
-        public virtual string MakeAddAParameter(State state)
+        public static string MakeAddAParameter(State state)
         {
             StringBuilder code = new StringBuilder();
             code.Append(@"
@@ -293,7 +325,7 @@ namespace QueryFirst.Providers
 
             return code.ToString();
         }
-        public virtual string TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true)
+        public static string _TypeMapDB2CS(string DBType, out string DBTypeNormalized, bool nullable = true)
         {
             switch (DBType.ToLower())
             {
@@ -400,70 +432,56 @@ namespace QueryFirst.Providers
             }
         }
 
-        public List<ResultFieldDetails> GetQuerySchema2ndAttempt(string sql, string connectionString)
+        public static List<ResultFieldDetails> GetQuerySchema2ndAttempt(this IDbConnection conn, string sql)
         {
-            using (var conn = GetConnection(connectionString))
+            var command = conn.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_DESCRIBE_FIRST_RESULT_SET";
+
+            var tsql = new SqlParameter("@TSQL", sql);
+            tsql.Direction = ParameterDirection.Input;
+            command.Parameters.Add(tsql);
+            var returnVal = new List<ResultFieldDetails>();
+            using (var dt = new DataTable()) 
             {
-                var command = conn.CreateCommand();
-                command.CommandType = CommandType.StoredProcedure;
-                command.CommandText = "SP_DESCRIBE_FIRST_RESULT_SET";
-
-                var tsql = new SqlParameter("@TSQL", sql);
-                tsql.Direction = ParameterDirection.Input;
-                command.Parameters.Add(tsql);
-                var returnVal = new List<ResultFieldDetails>();
-                using (DataTable dt = new DataTable())
+                conn.Open();
+                var dr = command.ExecuteReader();
+                dt.Load(dr);
+                foreach (DataRow rec in dt.Rows)
                 {
-                    conn.Open();
-                    var dr = command.ExecuteReader();
-                    dt.Load(dr);
-                    foreach (DataRow rec in dt.Rows)
+                    string colName = rec.Field<string>("name");
+                    string csColName;
+                    if (Regex.Match((colName.Substring(0, 1)), "[0-9]").Success)
+                        csColName = "_" + colName;
+                    else
+                        csColName = colName;
+                    var qp = GetParamInfo("dontCare", rec.Field<string>("system_type_name"));
+                    returnVal.Add(new ResultFieldDetails
                     {
-                        string colName = rec.Field<string>("name");
-                        string csColName;
-                        if (Regex.Match((colName.Substring(0, 1)), "[0-9]").Success)
-                            csColName = "_" + colName;
-                        else
-                            csColName = colName;
-                        var qp = GetParamInfo("dontCare", rec.Field<string>("system_type_name"));
-                        returnVal.Add(new ResultFieldDetails
-                        {
-                            ColumnName = colName,
-                            AllowDBNull = rec.Field<bool?>("is_nullable").GetValueOrDefault(),
-                            BaseColumnName = rec.Field<string>("name"),
-                            ColumnOrdinal = rec.Field<int>("column_ordinal"),
-                            CSColumnName = csColName,
-                            IsIdentity = rec.Field<bool?>("is_identity_column").GetValueOrDefault(),
-                            NumericPrecision = qp.Precision,
-                            NumericScale = qp.Scale,
-                            TypeCs = qp.FullyQualifiedCSType,
-                        }
-                        );
+                        ColumnName = colName,
+                        AllowDBNull = rec.Field<bool?>("is_nullable").GetValueOrDefault(),
+                        BaseColumnName = rec.Field<string>("name"),
+                        ColumnOrdinal = rec.Field<int>("column_ordinal"),
+                        CSColumnName = csColName,
+                        IsIdentity = rec.Field<bool?>("is_identity_column").GetValueOrDefault(),
+                        NumericPrecision = qp.Precision,
+                        NumericScale = qp.Scale,
+                        TypeCs = qp.FullyQualifiedCSType,
                     }
+                    );
                 }
-                return returnVal;
             }
+            return returnVal;
         }
 
-        public virtual string HookUpForExecutionMessages()
-        {
-            return $@"// this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
-((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
-    delegate (object sender, SqlInfoMessageEventArgs e)  {{ AppendExececutionMessage(e.Message); }});";
-        }
-
-        public virtual string GetProviderSpecificUsings()
-            => @"using System.Data.SqlClient;
-using System.Threading.Tasks;
-";
-
-        private class ParamFromText
+        public class ParamFromText
         {
             public string SqlName { get; set; }
             public string SqlTypeAndLength { get; set; }
             public string Direction { get; set; }
         }
     }
+
     public class TypeNotMatchedException : Exception
     {
         public TypeNotMatchedException(string message) : base(message) { }

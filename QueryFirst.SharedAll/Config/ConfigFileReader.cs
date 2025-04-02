@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace QueryFirst
 {
@@ -14,7 +13,7 @@ namespace QueryFirst
             var projectConfig = GetProjectConfig(startupOptions.SourcePath);
             var installConfig = GetInstallConfig();
 
-            var projectType = new ProjectType().DetectProjectType();
+            var projectType = ProjectType.DetectProjectType();
 
             // build config project-install 
             var configBuilder = new ConfigBuilder();
@@ -64,7 +63,7 @@ namespace QueryFirst
                 var project = JsonConvert.DeserializeObject<QfConfigModel>(fileContents);
                 SetDefaultProvider(project);
                 project.ProjectRoot = projectRoot;
-                project.ProjectNamespace = new Namespace().SniffProjectNamespace(fileOrFolder);
+                project.ProjectNamespace = Namespace.SniffProjectNamespace(fileOrFolder);
                 return project;
             }
             catch (Exception ex)
@@ -116,7 +115,7 @@ namespace QueryFirst
                 throw new Exception($"Error deserializing install config. Is there anything funny in there?", ex);
             }
         }
-        private QfConfigModel SetDefaultProvider(QfConfigModel config)
+        private static QfConfigModel SetDefaultProvider(QfConfigModel config)
         {
             // Sql server is the default IF connection string is provided.
             if (!string.IsNullOrEmpty(config.DefaultConnection) && string.IsNullOrEmpty(config.Provider))

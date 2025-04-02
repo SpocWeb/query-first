@@ -117,45 +117,43 @@ namespace MyProjectNamespace
                 if (startupOptions.Watch)
                 {
                     // watch for changes or renaming of the specified file. (VS renames a temp file after deleting the original file)
-                    using (FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(startupOptions.SourcePath), Path.GetFileName(startupOptions.SourcePath)))
+                    using FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(startupOptions.SourcePath), Path.GetFileName(startupOptions.SourcePath));
+                    watcher.NotifyFilter = NotifyFilters.LastAccess
+                                           | NotifyFilters.LastWrite
+                                           | NotifyFilters.FileName
+                                           | NotifyFilters.DirectoryName;
+
+
+                    watcher.Changed += (source, e) =>
                     {
-                        watcher.NotifyFilter = NotifyFilters.LastAccess
-                      | NotifyFilters.LastWrite
-                      | NotifyFilters.FileName
-                      | NotifyFilters.DirectoryName;
-
-
-                        watcher.Changed += (source, e) =>
+                        try
                         {
-                            try
-                            {
-                                var conductor = new CommandLineConductor().BuildUp();
-                                conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Write(ex.TellMeEverything());
-                            }
-
-                        };
-                        //watcher.Deleted += OnChanged;
-                        watcher.Renamed += (source, e) =>
+                            var conductor = new CommandLineConductor().BuildUp();
+                            conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
+                        }
+                        catch (Exception ex)
                         {
-                            try
-                            {
-                                var conductor = new CommandLineConductor().BuildUp();
-                                conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Write(ex.TellMeEverything());
-                            }
+                            Console.Write(ex.TellMeEverything());
+                        }
 
-                        };
-                        watcher.EnableRaisingEvents = true;
-                        Console.WriteLine("Press 'q' to stop watching.");
-                        while (Console.Read() != 'q') ;
-                    }
+                    };
+                    //watcher.Deleted += OnChanged;
+                    watcher.Renamed += (source, e) =>
+                    {
+                        try
+                        {
+                            var conductor = new CommandLineConductor().BuildUp();
+                            conductor.ProcessOneQuery(startupOptions.SourcePath, outerConfig);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Write(ex.TellMeEverything());
+                        }
+
+                    };
+                    watcher.EnableRaisingEvents = true;
+                    Console.WriteLine("Press 'q' to stop watching.");
+                    while (Console.Read() != 'q') ;
                 }
                 else
                 {
@@ -170,53 +168,51 @@ namespace MyProjectNamespace
                 if (startupOptions.Watch)
                 {
                     // watch for changes or renaming of .sql files in the specified folder.
-                    using (FileSystemWatcher watcher = new FileSystemWatcher(startupOptions.SourcePath, "*.sql"))
+                    using FileSystemWatcher watcher = new FileSystemWatcher(startupOptions.SourcePath, "*.sql");
+                    watcher.NotifyFilter = NotifyFilters.LastAccess
+                                           | NotifyFilters.LastWrite
+                                           | NotifyFilters.FileName
+                                           | NotifyFilters.DirectoryName;
+
+                    watcher.IncludeSubdirectories = true;
+
+
+                    watcher.Changed += (source, e) =>
                     {
-                        watcher.NotifyFilter = NotifyFilters.LastAccess
-                      | NotifyFilters.LastWrite
-                      | NotifyFilters.FileName
-                      | NotifyFilters.DirectoryName;
-
-                        watcher.IncludeSubdirectories = true;
-
-
-                        watcher.Changed += (source, e) =>
+                        try
                         {
-                            try
+                            if (e.FullPath.ToLower().EndsWith(".sql"))
                             {
-                                if (e.FullPath.ToLower().EndsWith(".sql"))
-                                {
-                                    var conductor = new CommandLineConductor().BuildUp();
-                                    conductor.ProcessOneQuery(e.FullPath, outerConfig);
-                                }
+                                var conductor = new CommandLineConductor().BuildUp();
+                                conductor.ProcessOneQuery(e.FullPath, outerConfig);
                             }
-                            catch (Exception ex)
-                            {
-                                Console.Write(ex.TellMeEverything());
-                            }
-
-                        };
-                        //watcher.Deleted += OnChanged;
-                        watcher.Renamed += (source, e) =>
+                        }
+                        catch (Exception ex)
                         {
-                            try
-                            {
-                                if (e.FullPath.ToLower().EndsWith(".sql"))
-                                {
-                                    var conductor = new CommandLineConductor().BuildUp();
-                                    conductor.ProcessOneQuery(e.FullPath, outerConfig);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Write(ex.TellMeEverything());
-                            }
+                            Console.Write(ex.TellMeEverything());
+                        }
 
-                        };
-                        watcher.EnableRaisingEvents = true;
-                        Console.WriteLine($"Press 'q' to stop watching in ${startupOptions.SourcePath}");
-                        while (Console.Read() != 'q') ;
-                    }
+                    };
+                    //watcher.Deleted += OnChanged;
+                    watcher.Renamed += (source, e) =>
+                    {
+                        try
+                        {
+                            if (e.FullPath.ToLower().EndsWith(".sql"))
+                            {
+                                var conductor = new CommandLineConductor().BuildUp();
+                                conductor.ProcessOneQuery(e.FullPath, outerConfig);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Write(ex.TellMeEverything());
+                        }
+
+                    };
+                    watcher.EnableRaisingEvents = true;
+                    Console.WriteLine($"Press 'q' to stop watching in ${startupOptions.SourcePath}");
+                    while (Console.Read() != 'q') ;
                 }
                 else
                 {

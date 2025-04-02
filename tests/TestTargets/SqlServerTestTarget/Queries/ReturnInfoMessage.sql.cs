@@ -1,19 +1,8 @@
 namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
-using System.Data.Common;
-using System.IO;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
 using QueryFirst;
-using System.Text.RegularExpressions;
-
-using static ReturnInfoMessageQfRepo;
-
-
 using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
 
 public interface IReturnInfoMessageQfRepo{
 
@@ -47,11 +36,9 @@ public static int ExecuteNonQueryStatic()
 => inst.ExecuteNonQuery();
 public virtual int ExecuteNonQuery()
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(conn);
 }
 
 public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
@@ -62,11 +49,10 @@ public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -77,12 +63,11 @@ var result = cmd.ExecuteNonQuery();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 
 #endregion
 
-public string getCommandText(){
+public static string GetCommandText(){
 var queryText = $@"-- use queryfirst
 /*designTime
 
@@ -94,7 +79,7 @@ PRINT 'info message for cobber'
 
 return queryText;
 }
-protected void AddParameters(IDbCommand cmd)
+protected static void AddParameters(IDbCommand cmd)
 {
 }
 }

@@ -71,7 +71,7 @@ namespace QueryFirst
             return state;
         }
 
-        bool IsNullable(Type type) => type == null || Nullable.GetUnderlyingType(type) != null;
+        static bool IsNullable(Type type) => type == null || Nullable.GetUnderlyingType(type) != null;
 
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace QueryFirst.Providers
+﻿namespace QueryFirst.Providers
 {
     [RegistrationName("Microsoft.Data.SqlClient")]
     public class MicrosoftDataSqlClient : SqlClient

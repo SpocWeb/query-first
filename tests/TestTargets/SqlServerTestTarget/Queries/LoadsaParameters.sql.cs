@@ -1,19 +1,10 @@
 namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
-using System.Data.Common;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using QueryFirst;
-using System.Text.RegularExpressions;
-
-using static LoadsaParametersQfRepo;
-
-
 using Microsoft.Data.SqlClient;
-using System.Threading.Tasks;
 
 public interface ILoadsaParametersQfRepo{
 
@@ -55,11 +46,9 @@ public static int ExecuteNonQueryStatic(long? myBigint, bool? myBit, decimal? my
 => inst.ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 public virtual int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
 }
 
 public static int ExecuteNonQueryStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar, IDbConnection conn, IDbTransaction tx = null)
@@ -70,11 +59,10 @@ public virtual int ExecuteNonQuery(long? myBigint, bool? myBit, decimal? myDecim
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 AddParameters(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar,  cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -85,12 +73,11 @@ var result = cmd.ExecuteNonQuery();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 
 #endregion
 
-public string getCommandText(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar){
+public static string GetCommandText(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar){
 var queryText = $@"/* .sql query managed by QueryFirst add-in */
 /*designTime - put parameter declarations and design time initialization here
 declare @MyBigint bigint;
@@ -141,12 +128,10 @@ public static List<LoadsaParametersQfDto> ExecuteStatic(long? myBigint, bool? my
 
 public virtual List<LoadsaParametersQfDto> Execute(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn).ToList();
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn).ToList();
+    return returnVal;
 }
 
 public static IEnumerable<LoadsaParametersQfDto> ExecuteStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar, IDbConnection conn, IDbTransaction tx = null)
@@ -157,18 +142,15 @@ public virtual IEnumerable<LoadsaParametersQfDto> Execute(long? myBigint, bool? 
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 AddParameters(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar,  cmd);
-using (var reader = cmd.ExecuteReader())
-{
+using var reader = cmd.ExecuteReader();
 while (reader.Read())
 {
-yield return Create(reader);
-}
+    yield return Create(reader);
 }
 
 // Assign output parameters to instance properties. These will be available after this method returns.
@@ -177,19 +159,16 @@ yield return Create(reader);
 
 */
 }
-}
 
 
 public static LoadsaParametersQfDto GetOneStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar)
 => inst.GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 public virtual LoadsaParametersQfDto GetOne(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
+    return returnVal;
 }
 public static LoadsaParametersQfDto GetOneStatic(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar, IDbConnection conn, IDbTransaction tx = null)
 => inst.GetOne(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn, tx);
@@ -201,11 +180,9 @@ public virtual LoadsaParametersQfDto GetOne(long? myBigint, bool? myBit, decimal
 {
 var all = Execute(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar,  conn,tx);
 LoadsaParametersQfDto returnVal;
-using (IEnumerator<LoadsaParametersQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<LoadsaParametersQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 }
@@ -214,15 +191,13 @@ public static System.String ExecuteScalarStatic(long? myBigint, bool? myBit, dec
 => inst.ExecuteScalar(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 public virtual System.String ExecuteScalar(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar)
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = ExecuteScalar(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = ExecuteScalar(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar, conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -233,11 +208,10 @@ public virtual System.String ExecuteScalar(long? myBigint, bool? myBit, decimal?
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar);
 AddParameters(myBigint, myBit, myDecimal, myInt, myMoney, mySmallint, myTinyint, myFloat, myReal, myDate, myDatetime, myDatetime2, myChar, myVarchar, myNchar, myNvarchar,  cmd);
 var result = cmd.ExecuteScalar();
 
@@ -247,10 +221,9 @@ var result = cmd.ExecuteScalar();
 
 */
 if( result == null || result == DBNull.Value)
-return null;
+    return null;
 else
-return (System.String)result;
-}
+    return (System.String)result;
 }
 
 
@@ -271,7 +244,7 @@ protected virtual LoadsaParametersQfDto CreatePoco(System.Data.IDataRecord recor
 {
     return new LoadsaParametersQfDto();
 }
-protected void AddParameters(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar, IDbCommand cmd)
+protected static void AddParameters(long? myBigint, bool? myBit, decimal? myDecimal, int? myInt, decimal? myMoney, short? mySmallint, byte? myTinyint, double? myFloat, float? myReal, DateTime? myDate, DateTime? myDatetime, DateTime? myDatetime2, string myChar, string myVarchar, string myNchar, string myNvarchar, IDbCommand cmd)
 {
 
 {

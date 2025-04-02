@@ -98,7 +98,7 @@ namespace QueryFirst.VSExtension
             }
             return;
         }
-        private void ProcessAllItems(ProjectItems items, VSOutputWindow vsOutputWindow)
+        private static void ProcessAllItems(ProjectItems items, VSOutputWindow vsOutputWindow)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             if (items != null)

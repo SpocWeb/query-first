@@ -1,23 +1,15 @@
 ﻿using MySql.Data.MySqlClient;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace QueryFirst.Providers
 {
     [RegistrationName("MySql.Data.MySqlClient")]
-    internal class MySqlClient : SqlClient, IProvider
+    internal class MySqlClient : SqlClient
     {
-
-        public override IDbConnection GetConnection(string connectionString)
-        {
-            return new MySqlConnection(connectionString);
-        }
-
-        public override List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString)
+        public static List<QueryParamInfo> ParseMySqlDeclaredParameters(string queryText)
         {
             var queryParams = new List<QueryParamInfo>();
             // get design time section
@@ -57,7 +49,7 @@ namespace QueryFirst.Providers
                             break;
                     }
 
-                    var qp = new QueryParamInfo()
+                    var qp = new QueryParamInfo
                     {
                         DbName = m.Groups["param"].Value,
                         CSNameCamel = char.ToLower(name.First()) + name.Substring(1),
@@ -76,22 +68,24 @@ namespace QueryFirst.Providers
 
             return queryParams;
         }
-        public override string MakeAddAParameter(State state)
-        {
-            StringBuilder code = new StringBuilder();
-            code.AppendLine("private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length, int Scale, int Precision)\n{");
-            code.AppendLine("((MySql.Data.MySqlClient.MySqlCommand)Cmd).Parameters.AddWithValue(DbName, Value);");
-            code.AppendLine("}");
-            return code.ToString();
-        }
+
+        private const string StrAddAParameter = @"private void AddAParameter(IDbCommand Cmd, string DbType, string DbName, object Value, int Length, int Scale, int Precision)
+{
+    ((MySql.Data.MySqlClient.MySqlCommand)Cmd).Parameters.AddWithValue(DbName, Value);
+}";
+
+        public override string MakeAddAParameter(State state) => StrAddAParameter;
+
         public override List<QueryParamInfo> FindUndeclaredParameters(string queryText, string connectionString, out string outputMessage)
         {
             outputMessage = null;
             return new List<QueryParamInfo>();
         }
-        public override string HookUpForExecutionMessages()
-        {
-            return "";
-        }
+        public override IDbConnection GetConnection(string connectionString) => new MySqlConnection(connectionString);
+
+        public override List<QueryParamInfo> ParseDeclaredParameters(string queryText, string connectionString)
+            => ParseMySqlDeclaredParameters(queryText);
+
+        public override string HookUpForExecutionMessages() => "";
     }
 }

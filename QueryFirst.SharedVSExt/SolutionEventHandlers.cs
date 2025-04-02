@@ -3,12 +3,9 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using TinyIoC;
 
 namespace QueryFirst.VSExtension
 {
@@ -141,7 +138,7 @@ $@"If you're using and enjoying QueryFirst.VSExtension, please leave a review!
                         var projectConfig = configFileReader.GetProjectConfig(Document.FullName);
                         var installConfig = configFileReader.GetInstallConfig();
 
-                        var projectType = new ProjectType().DetectProjectType();
+                        var projectType = ProjectType.DetectProjectType();
 
                         // build config project-install
                         var configBuilder = new ConfigBuilder();

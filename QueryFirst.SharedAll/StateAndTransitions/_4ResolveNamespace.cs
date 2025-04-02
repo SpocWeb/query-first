@@ -5,7 +5,7 @@ namespace QueryFirst
     public class _4ResolveNamespace
     {
         // user partial class is deprecated. We need to get all this from query config
-        public State Go(State state)
+        public static State Go(State state)
         {
             if (state == null)
                 throw new ArgumentNullException(nameof(state));

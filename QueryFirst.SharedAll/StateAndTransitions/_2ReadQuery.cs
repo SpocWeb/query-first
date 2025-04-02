@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryFirst
 {
@@ -14,7 +10,7 @@ namespace QueryFirst
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public State Go(State state)
+        public static State Go(State state)
         {
             if (state == null)
                 throw new ArgumentNullException(nameof(state));

@@ -2,16 +2,9 @@ namespace SqlServerTestTarget.Queries{
 using System;
 using System.Data;
 using System.Data.Common;
-using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using QueryFirst;
-using System.Text.RegularExpressions;
-
-using static GetOneRowAsyncQfRepo;
-
-
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 
@@ -66,11 +59,9 @@ public static int ExecuteNonQueryStatic()
 => inst.ExecuteNonQuery();
 public virtual int ExecuteNonQuery()
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-return ExecuteNonQuery(conn);
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    return ExecuteNonQuery(conn);
 }
 
 public static int ExecuteNonQueryStatic(IDbConnection conn, IDbTransaction tx = null)
@@ -81,11 +72,10 @@ public virtual int ExecuteNonQuery(IDbConnection conn, IDbTransaction tx = null)
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
 var result = cmd.ExecuteNonQuery();
 
@@ -95,7 +85,6 @@ var result = cmd.ExecuteNonQuery();
 */
 // only convert dbnull if nullable
 return result;
-}
 }
 
 
@@ -110,15 +99,13 @@ public static async Task<int> ExecuteNonQueryStaticAsync()
 
 public virtual async Task<int> ExecuteNonQueryAsync()
 {
-using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = await ExecuteNonQueryAsync( conn);
+    using DbConnection conn = (DbConnection)_connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = await ExecuteNonQueryAsync( conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 public static async Task<int> ExecuteNonQueryStaticAsync(IDbConnection conn, IDbTransaction tx = null)
@@ -129,12 +116,11 @@ public virtual async Task<int> ExecuteNonQueryAsync(IDbConnection conn, IDbTrans
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(DbCommand cmd = ((SqlConnection)conn).CreateCommand())
-{
+using DbCommand cmd = ((SqlConnection)conn).CreateCommand();
 if(tx != null)
-cmd.Transaction = (DbTransaction)tx;
+    cmd.Transaction = (DbTransaction)tx;
 
-cmd.CommandText = getCommandText();
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
 var result = await cmd.ExecuteNonQueryAsync();
 
@@ -145,10 +131,9 @@ var result = await cmd.ExecuteNonQueryAsync();
 // only convert dbnull if nullable
 return result;
 }
-}
 
 #endregion
-public string getCommandText(){
+public static string GetCommandText(){
 var queryText = $@"/* .sql query managed by QueryFirst add-in */
 /*designTime - put parameter declarations and design time initialization here
 endDesignTime*/
@@ -167,12 +152,10 @@ public static List<GetOneRowAsyncQfDto> ExecuteStatic()
 
 public virtual List<GetOneRowAsyncQfDto> Execute()
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = Execute(conn).ToList();
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = Execute(conn).ToList();
+    return returnVal;
 }
 
 public static IEnumerable<GetOneRowAsyncQfDto> ExecuteStatic(IDbConnection conn, IDbTransaction tx = null)
@@ -183,18 +166,15 @@ public virtual IEnumerable<GetOneRowAsyncQfDto> Execute(IDbConnection conn, IDbT
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
-using (var reader = cmd.ExecuteReader())
-{
+using var reader = cmd.ExecuteReader();
 while (reader.Read())
 {
-yield return Create(reader);
-}
+    yield return Create(reader);
 }
 
 // Assign output parameters to instance properties. These will be available after this method returns.
@@ -203,19 +183,16 @@ yield return Create(reader);
 
 */
 }
-}
 
 
 public static GetOneRowAsyncQfDto GetOneStatic()
 => inst.GetOne();
 public virtual GetOneRowAsyncQfDto GetOne()
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = GetOne(conn);
-return returnVal;
-}
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = GetOne(conn);
+    return returnVal;
 }
 public static GetOneRowAsyncQfDto GetOneStatic(IDbConnection conn, IDbTransaction tx = null)
 => inst.GetOne(conn, tx);
@@ -227,11 +204,9 @@ public virtual GetOneRowAsyncQfDto GetOne(IDbConnection conn, IDbTransaction tx 
 {
 var all = Execute( conn,tx);
 GetOneRowAsyncQfDto returnVal;
-using (IEnumerator<GetOneRowAsyncQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<GetOneRowAsyncQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 }
@@ -240,15 +215,13 @@ public static System.String ExecuteScalarStatic()
 => inst.ExecuteScalar();
 public virtual System.String ExecuteScalar()
 {
-using (IDbConnection conn = _connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = ExecuteScalar(conn);
+    using IDbConnection conn = _connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = ExecuteScalar(conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -259,11 +232,10 @@ public virtual System.String ExecuteScalar(IDbConnection conn, IDbTransaction tx
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using(IDbCommand cmd = conn.CreateCommand())
-{
+using IDbCommand cmd = conn.CreateCommand();
 if(tx != null)
-cmd.Transaction = tx;
-cmd.CommandText = getCommandText();
+    cmd.Transaction = tx;
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
 var result = cmd.ExecuteScalar();
 
@@ -273,10 +245,9 @@ var result = cmd.ExecuteScalar();
 
 */
 if( result == null || result == DBNull.Value)
-return null;
+    return null;
 else
-return (System.String)result;
-}
+    return (System.String)result;
 }
 
 
@@ -289,15 +260,13 @@ public static async Task<List<GetOneRowAsyncQfDto>> ExecuteStaticAsync()
 => await inst.ExecuteAsync();
 public virtual async Task<List<GetOneRowAsyncQfDto>> ExecuteAsync()
 {
-using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
-{
-await conn.OpenAsync();
-var returnVal = await ExecuteAsync(conn);
+    using DbConnection conn = (DbConnection)_connectionFactory.CreateConnection();
+    await conn.OpenAsync();
+    var returnVal = await ExecuteAsync(conn);
 /*
 
 */
-return returnVal.ToList();
-}
+    return returnVal.ToList();
 }
 
 public static async Task<IEnumerable<GetOneRowAsyncQfDto>> ExecuteStaticAsync( IDbConnection conn, IDbTransaction tx = null)
@@ -307,12 +276,11 @@ public virtual async Task<IEnumerable<GetOneRowAsyncQfDto>> ExecuteAsync( IDbCon
 // this line will not compile in .net core unless you install the System.Data.SqlClient nuget package.
 ((SqlConnection)conn).InfoMessage += new SqlInfoMessageEventHandler(
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
-using (DbCommand cmd = ((SqlConnection)conn).CreateCommand())
-{
+using DbCommand cmd = ((SqlConnection)conn).CreateCommand();
 if(tx != null)
-cmd.Transaction = (DbTransaction)tx;
+    cmd.Transaction = (DbTransaction)tx;
 
-cmd.CommandText = getCommandText();
+cmd.CommandText = GetCommandText();
 AddParameters( cmd);
 SqlDataReader reader = (SqlDataReader)await cmd.ExecuteReaderAsync();
                 
@@ -323,7 +291,6 @@ SqlDataReader reader = (SqlDataReader)await cmd.ExecuteReaderAsync();
 */
 
 return ReadItems(reader).ToArray();
-}
 }
 IEnumerable<GetOneRowAsyncQfDto> ReadItems(SqlDataReader reader)
 {
@@ -340,11 +307,9 @@ public static async Task<GetOneRowAsyncQfDto> GetOneStaticAsync()
 
 public virtual async Task<GetOneRowAsyncQfDto> GetOneAsync()
 {
-using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
-{
+    using DbConnection conn = (DbConnection)_connectionFactory.CreateConnection();
     await conn.OpenAsync();
     return await GetOneAsync( conn);
-}
 }
 
 public static async Task<GetOneRowAsyncQfDto> GetOneStaticAsync(IDbConnection conn, IDbTransaction tx = null)
@@ -357,11 +322,9 @@ public virtual async Task<GetOneRowAsyncQfDto> GetOneAsync(IDbConnection conn, I
     delegate (object sender, SqlInfoMessageEventArgs e)  { AppendExececutionMessage(e.Message); });// hello from MyGroovyProvider
 var all = await ExecuteAsync( conn,tx);
 GetOneRowAsyncQfDto returnVal;
-using (IEnumerator<GetOneRowAsyncQfDto> iter = all.GetEnumerator())
-{
+using IEnumerator<GetOneRowAsyncQfDto> iter = all.GetEnumerator();
 iter.MoveNext();
 returnVal = iter.Current;
-}
 return returnVal;
 }
 
@@ -370,15 +333,13 @@ public static async Task<System.String> ExecuteScalarStaticAsync()
 
 public virtual async Task<System.String> ExecuteScalarAsync()
 {
-using (DbConnection conn = (DbConnection)_connectionFactory.CreateConnection())
-{
-conn.Open();
-var returnVal = await ExecuteScalarAsync( conn);
+    using DbConnection conn = (DbConnection)_connectionFactory.CreateConnection();
+    conn.Open();
+    var returnVal = await ExecuteScalarAsync( conn);
 /*
 ;
 */
-return returnVal;
-}
+    return returnVal;
 }
 
 
@@ -387,25 +348,23 @@ public static async Task<System.String> ExecuteScalarStaticAsync( IDbConnection 
 
 public virtual async Task<System.String> ExecuteScalarAsync( IDbConnection conn, IDbTransaction tx = null)
 {
-using(DbCommand cmd = ((SqlConnection)conn).CreateCommand())
-{
-if(tx != null)
-cmd.Transaction = (DbTransaction)tx;
+    using DbCommand cmd = ((SqlConnection)conn).CreateCommand();
+    if(tx != null)
+        cmd.Transaction = (DbTransaction)tx;
 
-cmd.CommandText = getCommandText();
-AddParameters( cmd);
-var result = await cmd.ExecuteScalarAsync();
+    cmd.CommandText = GetCommandText();
+    AddParameters( cmd);
+    var result = await cmd.ExecuteScalarAsync();
 
 // only convert dbnull if nullable
 // Assign output parameters to instance properties. 
 /*
 
 */
-if( result == null || result == DBNull.Value)
-return null;
-else
-return (System.String)result;
-}
+    if( result == null || result == DBNull.Value)
+        return null;
+    else
+        return (System.String)result;
 }
 
 
@@ -426,7 +385,7 @@ protected virtual GetOneRowAsyncQfDto CreatePoco(System.Data.IDataRecord record)
 {
     return new GetOneRowAsyncQfDto();
 }
-protected void AddParameters(IDbCommand cmd)
+protected static void AddParameters(IDbCommand cmd)
 {
 }
 }

@@ -1,5 +1,4 @@
-﻿using QueryFirst.TypeMappings;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace QueryFirst
 {

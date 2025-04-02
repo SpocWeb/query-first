@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace QueryFirst.CoreLib.Utils
+﻿namespace QueryFirst.CoreLib.Utils
 {
     public static class Extensions
     {

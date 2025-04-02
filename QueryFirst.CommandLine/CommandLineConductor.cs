@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
@@ -60,7 +59,7 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
                     return;
                 }
                 // assign some names
-                new _4ResolveNamespace().Go(_state);
+                _4ResolveNamespace.Go(_state);
 
                 // Scaffold inserts and updates
                 _tiny.Resolve<_5ScaffoldUpdateOrInsert>().Go(ref _state);
@@ -158,15 +157,13 @@ The query {1} may not run and the wrapper has not been regenerated.\n",
         /// Now we can connect the editor window, we need to recover the connection string when we open a query.
         /// This method is called on open and on save.
         /// </summary>
-        /// <param name="sourcePath"></param>
-        /// <param name="state"></param>
-        internal void ProcessUpToStep4(string sourcePath, QfConfigModel outerConfig, ref State state)
+        internal static void ProcessUpToStep4(string sourcePath, QfConfigModel outerConfig, ref State state)
         {
             // todo: if a .sql is not in the project, this throws null exception. What should it do?
-            new _1ProcessQueryPath().Go(state, sourcePath);
+            _1ProcessQueryPath.Go(state, sourcePath);
 
 
-            new _2ReadQuery().Go(state);
+            _2ReadQuery.Go(state);
             var _3 = new _3ResolveConfig().BuildUp();
             _3.Go(state, outerConfig);
         }

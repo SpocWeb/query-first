@@ -3470,7 +3470,7 @@ namespace TinyIoC
             }
         }
 
-        private bool IsIgnoredAssembly(Assembly assembly)
+        private static bool IsIgnoredAssembly(Assembly assembly)
         {
             // TODO - find a better way to remove "system" assemblies from the auto registration
             var ignoreChecks = new List<Func<Assembly, bool>>()
@@ -3494,7 +3494,7 @@ namespace TinyIoC
             return false;
         }
 
-        private bool IsIgnoredType(Type type, Func<Type, bool> registrationPredicate)
+        private static bool IsIgnoredType(Type type, Func<Type, bool> registrationPredicate)
         {
             // TODO - find a better way to remove "system" types from the auto registration
             var ignoreChecks = new List<Func<Type, bool>>()
@@ -3561,7 +3561,7 @@ namespace TinyIoC
             return _RegisteredTypes.Remove(typeRegistration);
         }
 
-        private ObjectFactoryBase GetDefaultObjectFactory(Type registerType, Type registerImplementation)
+        private static ObjectFactoryBase GetDefaultObjectFactory(Type registerType, Type registerImplementation)
         {
             //#if NETFX_CORE
             //			if (registerType.GetTypeInfo().IsInterface() || registerType.GetTypeInfo().IsAbstract())
@@ -3647,7 +3647,7 @@ namespace TinyIoC
             return false;
         }
 
-        private bool IsIEnumerableRequest(Type type)
+        private static bool IsIEnumerableRequest(Type type)
         {
             if (!type.IsGenericType())
                 return false;
@@ -3660,7 +3660,7 @@ namespace TinyIoC
             return false;
         }
 
-        private bool IsAutomaticLazyFactoryRequest(Type type)
+        private static bool IsAutomaticLazyFactoryRequest(Type type)
         {
             if (!type.IsGenericType())
                 return false;
@@ -3943,7 +3943,7 @@ namespace TinyIoC
 
             // Get constructors in reverse order based on the number of parameters
             // i.e. be as "greedy" as possible so we satify the most amount of dependencies possible
-            var ctors = this.GetTypeConstructors(type);
+            var ctors = GetTypeConstructors(type);
 
             foreach (var ctor in ctors)
             {
@@ -3954,7 +3954,7 @@ namespace TinyIoC
             return null;
         }
 
-        private IEnumerable<ConstructorInfo> GetTypeConstructors(Type type)
+        private static IEnumerable<ConstructorInfo> GetTypeConstructors(Type type)
         {
             //#if NETFX_CORE
             //			return type.GetTypeInfo().DeclaredConstructors.OrderByDescending(ctor => ctor.GetParameters().Count());

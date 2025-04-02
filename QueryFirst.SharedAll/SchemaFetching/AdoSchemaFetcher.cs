@@ -1,7 +1,6 @@
 ﻿using QueryFirst.Providers;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 
 namespace QueryFirst
@@ -42,7 +41,7 @@ namespace QueryFirst
                     prov = new SqlClient();
                     break;
                 case "Npgsql":
-                    prov = new Providers.Npgsql();
+                    prov = new Providers.NpgSql();
                     break;
                 case "MySql.Data.MySqlClient":
                     prov = new MySqlClient();
@@ -54,7 +53,7 @@ namespace QueryFirst
         }
 
 
-        private List<ResultFieldDetails> GetFields(IDbConnection connection, IProvider provObj, string Query)
+        private static List<ResultFieldDetails> GetFields(IDbConnection connection, IProvider provObj, string Query)
         {
             DataTable dt = new DataTable();
             var SchemaTable = GetQuerySchema(connection, provObj, Query);
@@ -178,7 +177,7 @@ namespace QueryFirst
 
 
         // Perform the query, extract the results
-        private DataTable GetQuerySchema(IDbConnection connection, IProvider prov, string strSQL)
+        private static DataTable GetQuerySchema(IDbConnection connection, IProvider prov, string strSQL)
         {
             // Returns a DataTable filled with the results of the query
             // Function returns the count of records in the datatable
@@ -190,10 +189,7 @@ namespace QueryFirst
                 command.CommandText = strSQL;
                 prov.PrepareParametersForSchemaFetching(command);
                 using (var srdrQuery = command.ExecuteReader(CommandBehavior.SchemaOnly))
-                {
-                    var dtSchema = srdrQuery.GetSchemaTable();
-                    return dtSchema;
-                }
+                    return srdrQuery.GetSchemaTable();
             }
         }
     }

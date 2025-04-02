@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryFirst
 {
     public class _1ProcessQueryPath
     {
-        public State Go(State state, string queryPathAndFilename)
+        public static State Go(State state, string queryPathAndFilename)
         {
             if (state == null)
                 throw new ArgumentNullException(nameof(state));

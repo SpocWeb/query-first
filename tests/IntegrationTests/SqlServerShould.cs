@@ -1,6 +1,4 @@
 using FluentAssertions;
-using System;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -51,7 +49,7 @@ namespace IntegrationTests
             
 
         }
-        private (string stdOut, string stdErr) RunProcess(string filename, string args = "")
+        private static (string stdOut, string stdErr) RunProcess(string filename, string args = "")
         {
             var psi = new ProcessStartInfo(filename, args)
             {
