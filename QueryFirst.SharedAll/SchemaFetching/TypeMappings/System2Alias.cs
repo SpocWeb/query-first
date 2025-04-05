@@ -4,7 +4,7 @@ namespace QueryFirst
 {
     public static class System2Alias
     {
-        private static Dictionary<string, string> _map = new Dictionary<string, string>()
+        public static readonly IReadOnlyDictionary<string, string> _map = new Dictionary<string, string>()
             {
                 {"System.Int32","int" },
                 {"System.String","string" },

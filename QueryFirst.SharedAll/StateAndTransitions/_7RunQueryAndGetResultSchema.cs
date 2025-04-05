@@ -35,21 +35,6 @@ namespace QueryFirst
                 if (field.ColumnName.IndexOf('?') != -1)
                 {
                     field.CSColumnName = field.CSColumnName.Substring(0, field.ColumnName.IndexOf('?'));
-
-                    var columnOptions = new Dictionary<string, string>();
-
-                    // todo let's have some tests for this little-used functionality.
-                    var parts = field.ColumnName.Split('?');
-                    if (parts.Length == 2)
-                    {
-                        var nameVals = parts[1].Split('&');
-                        foreach (var option in nameVals)
-                        {
-                            var nameVal = option.Split('=');
-                            columnOptions.Add(nameVal[0], nameVal.Length > 1 ? nameVal[1] : null);
-                        }
-                    }
-                    field.ColumnOptions = columnOptions;
                 }
 
                 field.CamelCaseColumnName = Char.ToLowerInvariant(field.CSColumnName[0]) + field.CSColumnName.Substring(1);

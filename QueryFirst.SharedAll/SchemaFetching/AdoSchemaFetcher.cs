@@ -53,7 +53,9 @@ namespace QueryFirst
         }
 
 
-        private static List<ResultFieldDetails> GetFields(IDbConnection connection, IProvider provObj, string Query)
+        /// <summary> Reads the Result Columns Schema from the query. </summary>
+        /// <returns></returns>
+        public static List<ResultFieldDetails> GetFields(IDbConnection connection, IProvider provObj, string Query)
         {
             DataTable dt = new DataTable();
             var SchemaTable = GetQuerySchema(connection, provObj, Query);
@@ -168,7 +170,6 @@ namespace QueryFirst
                         }
                     }
                 }
-                qf.RawProperties = properties;
                 result.Add(qf);
             }
 
@@ -177,7 +178,7 @@ namespace QueryFirst
 
 
         // Perform the query, extract the results
-        private static DataTable GetQuerySchema(IDbConnection connection, IProvider prov, string strSQL)
+        public static DataTable GetQuerySchema(IDbConnection connection, IProvider prov, string strSQL)
         {
             // Returns a DataTable filled with the results of the query
             // Function returns the count of records in the datatable

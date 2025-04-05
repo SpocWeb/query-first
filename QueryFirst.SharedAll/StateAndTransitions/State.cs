@@ -57,7 +57,7 @@ namespace QueryFirst
         /// if the Order By args are present in signatures, values will need to be supplied. Here we pass through the values.
         /// </summary>
         public string _5OrderByParamValues { get; set; }
-        public bool _5HasDynamicOrderBy { get { return !string.IsNullOrEmpty(_5OrderByParamDeclarations); } }
+        public bool _5HasDynamicOrderBy => !string.IsNullOrEmpty(_5OrderByParamDeclarations);
         public string _6NewParamDeclarations { get; set; }
         public string _6QueryWithParamsAdded { get; set; }
         public string _6FinalQueryTextForCode { get; set; }

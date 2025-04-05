@@ -936,13 +936,7 @@ namespace QueryFirst
 
         private static readonly NamedParameterOverloads _Default = new NamedParameterOverloads();
 
-        public static NamedParameterOverloads Default
-        {
-            get
-            {
-                return _Default;
-            }
-        }
+        public static NamedParameterOverloads Default => _Default;
     }
 
 #if TINYIOC_INTERNAL
@@ -1028,46 +1022,22 @@ namespace QueryFirst
         /// <summary>
         /// Gets the default options (attempt resolution of unregistered types, fail on named resolution if name not found)
         /// </summary>
-        public static ResolveOptions Default
-        {
-            get
-            {
-                return _Default;
-            }
-        }
+        public static ResolveOptions Default => _Default;
 
         /// <summary>
         /// Preconfigured option for attempting resolution of unregistered types and failing on named resolution if name not found
         /// </summary>
-        public static ResolveOptions FailNameNotFoundOnly
-        {
-            get
-            {
-                return _FailNameNotFoundOnly;
-            }
-        }
+        public static ResolveOptions FailNameNotFoundOnly => _FailNameNotFoundOnly;
 
         /// <summary>
         /// Preconfigured option for failing on resolving unregistered types and on named resolution if name not found
         /// </summary>
-        public static ResolveOptions FailUnregisteredAndNameNotFound
-        {
-            get
-            {
-                return _FailUnregisteredAndNameNotFound;
-            }
-        }
+        public static ResolveOptions FailUnregisteredAndNameNotFound => _FailUnregisteredAndNameNotFound;
 
         /// <summary>
         /// Preconfigured option for failing on resolving unregistered types, but attempting unnamed resolution if name not found
         /// </summary>
-        public static ResolveOptions FailUnregisteredOnly
-        {
-            get
-            {
-                return _FailUnregisteredOnly;
-            }
-        }
+        public static ResolveOptions FailUnregisteredOnly => _FailUnregisteredOnly;
     }
     #endregion
 
@@ -2758,7 +2728,7 @@ namespace QueryFirst
             /// Generally set to true for delegate style factories as CanResolve cannot delve
             /// into the delegates they contain.
             /// </summary>
-            public virtual bool AssumeConstruction { get { return false; } }
+            public virtual bool AssumeConstruction => false;
 
             /// <summary>
             /// The type the factory instantiates
@@ -2780,37 +2750,13 @@ namespace QueryFirst
             /// <returns></returns>
             public abstract object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options);
 
-            public virtual ObjectFactoryBase SingletonVariant
-            {
-                get
-                {
-                    throw new TinyIoCRegistrationException(this.GetType(), "singleton");
-                }
-            }
+            public virtual ObjectFactoryBase SingletonVariant => throw new TinyIoCRegistrationException(this.GetType(), "singleton");
 
-            public virtual ObjectFactoryBase MultiInstanceVariant
-            {
-                get
-                {
-                    throw new TinyIoCRegistrationException(this.GetType(), "multi-instance");
-                }
-            }
+            public virtual ObjectFactoryBase MultiInstanceVariant => throw new TinyIoCRegistrationException(this.GetType(), "multi-instance");
 
-            public virtual ObjectFactoryBase StrongReferenceVariant
-            {
-                get
-                {
-                    throw new TinyIoCRegistrationException(this.GetType(), "strong reference");
-                }
-            }
+            public virtual ObjectFactoryBase StrongReferenceVariant => throw new TinyIoCRegistrationException(this.GetType(), "strong reference");
 
-            public virtual ObjectFactoryBase WeakReferenceVariant
-            {
-                get
-                {
-                    throw new TinyIoCRegistrationException(this.GetType(), "weak reference");
-                }
-            }
+            public virtual ObjectFactoryBase WeakReferenceVariant => throw new TinyIoCRegistrationException(this.GetType(), "weak reference");
 
             public virtual ObjectFactoryBase GetCustomObjectLifetimeVariant(ITinyIoCObjectLifetimeProvider lifetimeProvider, string errorString)
             {
@@ -2835,7 +2781,7 @@ namespace QueryFirst
         {
             private readonly Type registerType;
             private readonly Type registerImplementation;
-            public override Type CreatesType { get { return this.registerImplementation; } }
+            public override Type CreatesType => this.registerImplementation;
 
             public MultiInstanceFactory(Type registerType, Type registerImplementation)
             {
@@ -2865,26 +2811,14 @@ namespace QueryFirst
                 }
             }
 
-            public override ObjectFactoryBase SingletonVariant
-            {
-                get
-                {
-                    return new SingletonFactory(this.registerType, this.registerImplementation);
-                }
-            }
+            public override ObjectFactoryBase SingletonVariant => new SingletonFactory(this.registerType, this.registerImplementation);
 
             public override ObjectFactoryBase GetCustomObjectLifetimeVariant(ITinyIoCObjectLifetimeProvider lifetimeProvider, string errorString)
             {
                 return new CustomObjectLifetimeFactory(this.registerType, this.registerImplementation, lifetimeProvider, errorString);
             }
 
-            public override ObjectFactoryBase MultiInstanceVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase MultiInstanceVariant => this;
         }
 
         /// <summary>
@@ -2896,9 +2830,9 @@ namespace QueryFirst
 
             private Func<TinyIoCContainer, NamedParameterOverloads, object> _factory;
 
-            public override bool AssumeConstruction { get { return true; } }
+            public override bool AssumeConstruction => true;
 
-            public override Type CreatesType { get { return this.registerType; } }
+            public override Type CreatesType => this.registerType;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
@@ -2922,21 +2856,9 @@ namespace QueryFirst
                 this.registerType = registerType;
             }
 
-            public override ObjectFactoryBase WeakReferenceVariant
-            {
-                get
-                {
-                    return new WeakDelegateFactory(this.registerType, _factory);
-                }
-            }
+            public override ObjectFactoryBase WeakReferenceVariant => new WeakDelegateFactory(this.registerType, _factory);
 
-            public override ObjectFactoryBase StrongReferenceVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase StrongReferenceVariant => this;
 
             public override void SetConstructor(ConstructorInfo constructor)
             {
@@ -2954,9 +2876,9 @@ namespace QueryFirst
 
             private WeakReference _factory;
 
-            public override bool AssumeConstruction { get { return true; } }
+            public override bool AssumeConstruction => true;
 
-            public override Type CreatesType { get { return this.registerType; } }
+            public override Type CreatesType => this.registerType;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
@@ -2998,13 +2920,7 @@ namespace QueryFirst
                 }
             }
 
-            public override ObjectFactoryBase WeakReferenceVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase WeakReferenceVariant => this;
 
             public override void SetConstructor(ConstructorInfo constructor)
             {
@@ -3021,7 +2937,7 @@ namespace QueryFirst
             private readonly Type registerImplementation;
             private object _instance;
 
-            public override bool AssumeConstruction { get { return true; } }
+            public override bool AssumeConstruction => true;
 
             public InstanceFactory(Type registerType, Type registerImplementation, object instance)
             {
@@ -3033,36 +2949,18 @@ namespace QueryFirst
                 _instance = instance;
             }
 
-            public override Type CreatesType
-            {
-                get { return this.registerImplementation; }
-            }
+            public override Type CreatesType => this.registerImplementation;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
                 return _instance;
             }
 
-            public override ObjectFactoryBase MultiInstanceVariant
-            {
-                get { return new MultiInstanceFactory(this.registerType, this.registerImplementation); }
-            }
+            public override ObjectFactoryBase MultiInstanceVariant => new MultiInstanceFactory(this.registerType, this.registerImplementation);
 
-            public override ObjectFactoryBase WeakReferenceVariant
-            {
-                get
-                {
-                    return new WeakInstanceFactory(this.registerType, this.registerImplementation, this._instance);
-                }
-            }
+            public override ObjectFactoryBase WeakReferenceVariant => new WeakInstanceFactory(this.registerType, this.registerImplementation, this._instance);
 
-            public override ObjectFactoryBase StrongReferenceVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase StrongReferenceVariant => this;
 
             public override void SetConstructor(ConstructorInfo constructor)
             {
@@ -3099,10 +2997,7 @@ namespace QueryFirst
                 _instance = new WeakReference(instance);
             }
 
-            public override Type CreatesType
-            {
-                get { return this.registerImplementation; }
-            }
+            public override Type CreatesType => this.registerImplementation;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
@@ -3114,21 +3009,9 @@ namespace QueryFirst
                 return instance;
             }
 
-            public override ObjectFactoryBase MultiInstanceVariant
-            {
-                get
-                {
-                    return new MultiInstanceFactory(this.registerType, this.registerImplementation);
-                }
-            }
+            public override ObjectFactoryBase MultiInstanceVariant => new MultiInstanceFactory(this.registerType, this.registerImplementation);
 
-            public override ObjectFactoryBase WeakReferenceVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase WeakReferenceVariant => this;
 
             public override ObjectFactoryBase StrongReferenceVariant
             {
@@ -3183,10 +3066,7 @@ namespace QueryFirst
                 this.registerImplementation = registerImplementation;
             }
 
-            public override Type CreatesType
-            {
-                get { return this.registerImplementation; }
-            }
+            public override Type CreatesType => this.registerImplementation;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
@@ -3200,26 +3080,14 @@ namespace QueryFirst
                 return _Current;
             }
 
-            public override ObjectFactoryBase SingletonVariant
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            public override ObjectFactoryBase SingletonVariant => this;
 
             public override ObjectFactoryBase GetCustomObjectLifetimeVariant(ITinyIoCObjectLifetimeProvider lifetimeProvider, string errorString)
             {
                 return new CustomObjectLifetimeFactory(this.registerType, this.registerImplementation, lifetimeProvider, errorString);
             }
 
-            public override ObjectFactoryBase MultiInstanceVariant
-            {
-                get
-                {
-                    return new MultiInstanceFactory(this.registerType, this.registerImplementation);
-                }
-            }
+            public override ObjectFactoryBase MultiInstanceVariant => new MultiInstanceFactory(this.registerType, this.registerImplementation);
 
             public override ObjectFactoryBase GetFactoryForChildContainer(Type type, TinyIoCContainer parent, TinyIoCContainer child)
             {
@@ -3272,10 +3140,7 @@ namespace QueryFirst
                 _LifetimeProvider = lifetimeProvider;
             }
 
-            public override Type CreatesType
-            {
-                get { return this.registerImplementation; }
-            }
+            public override Type CreatesType => this.registerImplementation;
 
             public override object GetObject(Type requestedType, TinyIoCContainer container, NamedParameterOverloads parameters, ResolveOptions options)
             {
@@ -3344,13 +3209,7 @@ namespace QueryFirst
         /// <summary>
         /// Lazy created Singleton instance of the container for simple scenarios
         /// </summary>
-        public static TinyIoCContainer Current
-        {
-            get
-            {
-                return _Current;
-            }
-        }
+        public static TinyIoCContainer Current => _Current;
         #endregion
 
         #region Type Registrations
